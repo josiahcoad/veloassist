@@ -14,7 +14,7 @@ var currentPosition;
 const getStartLocation = () => currentPosition || $('#start').val();
 
 function initMap() {
-  const positions = [
+  const stations = [
     [30.6229431, -96.3369853],
     [30.6223614, -96.3397319],
     [30.6212282, -96.3409694],
@@ -240,8 +240,8 @@ function initMap() {
   var map = new google.maps.Map(document.getElementById('map'), {
     zoom: 15,
     center: {
-      lat: positions[13][0],
-      lng: positions[13][1],
+      lat: stations[13][0],
+      lng: stations[13][1],
     },
   });
   directionsRenderer.setMap(map);
@@ -254,6 +254,7 @@ function initMap() {
     const start = getStartLocation();
     const end = $('#end').val();
     if (start && end) {
+      getNearbyBikes(30.5159362, -96.5171539);
       calculateAndDisplayRoute(start, end);
     }
   };
@@ -447,7 +448,27 @@ function initMap() {
 
   var stationMarkers = [];
 
-  positions.forEach(function(position) {
+  const make_circle = (center) =>
+    new google.maps.Circle({
+      editable: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: map,
+      center: {lat: center[0], lng: center[1]},
+      radius: 30
+    })
+
+  stations.forEach(center => {
+    const circle = make_circle(center);
+    google.maps.event.addListener(circle, 'radius_changed', function() {
+      console.log(circle.getRadius());
+    })
+  });
+
+  stations.forEach(function(position) {
     stationMarkers.push(
       new google.maps.Marker({
         position: new google.maps.LatLng(position[0], position[1]),
