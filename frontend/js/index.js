@@ -447,6 +447,20 @@ function initMap() {
 
   var stationMarkers = [];
 
+  const make_circle = (center) =>
+    new google.maps.Circle({
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: map,
+      center: {lat: center[0], lng: center[1]},
+      radius: 30
+    });
+
+  stations.forEach(make_circle);
+
   stations.forEach(function(position) {
     stationMarkers.push(
       new google.maps.Marker({
