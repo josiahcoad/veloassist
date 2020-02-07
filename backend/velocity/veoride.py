@@ -111,19 +111,21 @@ def veoride_get_nearby_bikes():
 
   bike_data = bikes_result.json()['data']
 
-  processed_bike_data = process_and_filter_bike_data(bike_data, user_loc)
-  if processed_bike_data == None:
-    return jsonify({"error": "Error in getting bike data"}), 500
-
-  return jsonify({"data": processed_bike_data}), 200
+  if len(bike_data) == 0:
+    msg = f"No bikes found near ({user_lat}, {user_lng})"
+    print(msg)
+    return jsonify({"data": [], "message": msg}), 200
+  else:
+    processed_bike_data = process_and_filter_bike_data(bike_data, user_loc)
+    if processed_bike_data == None:
+      return jsonify({"error": "Error in getting bike data"}), 500
+    return jsonify({"data": processed_bike_data}), 200
 
 """Returns: List of nearest bike stations ranked on walking distance
 """
 @app.route(f"{constants.VEORIDE_ENDPOINT_PREFIX}/get_nearby_stations")
 def veoride_get_nearby_stations():
   origin = request.args.get('origin')
-
-  bike_station_locations
 
   walking_travel_info = get_walking_travel_info(origin, constants.BIKE_STATION_LOCATIONS)
 
