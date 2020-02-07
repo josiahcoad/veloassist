@@ -471,7 +471,7 @@ function initMap() {
   stations.forEach(function(position) {
     stationMarkers.push(
       new google.maps.Marker({
-        position: new google.maps.LatLng(position[0] + 1, position[1] - 1),
+        position: new google.maps.LatLng(position[0] - 0.000005, position[1] + 0.000005),
         icon: parking,
         map: map,
         zindex: 10,
