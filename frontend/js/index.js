@@ -451,6 +451,7 @@ function initMap() {
     stationMarkers.push(
       new google.maps.Marker({
         position: new google.maps.LatLng(position[0], position[1]),
+        anchor: new google.maps.LatLng(position[0], position[1]),
         icon: parking,
         map: map,
         zindex: 10,
