@@ -254,6 +254,7 @@ function initMap() {
     const start = getStartLocation();
     const end = $('#end').val();
     if (start && end) {
+      getNearbyBikes(30.5159362, -96.5171539);
       calculateAndDisplayRoute(start, end);
     }
   };
@@ -449,6 +450,7 @@ function initMap() {
 
   const make_circle = (center) =>
     new google.maps.Circle({
+      editable: true,
       strokeColor: '#FF0000',
       strokeOpacity: 0.8,
       strokeWeight: 2,
@@ -457,9 +459,14 @@ function initMap() {
       map: map,
       center: {lat: center[0], lng: center[1]},
       radius: 30
-    });
+    })
 
-  stations.forEach(make_circle);
+  stations.forEach(center => {
+    const circle = make_circle(center);
+    google.maps.event.addListener(circle, 'radius_changed', function() {
+      console.log(circle.getRadius());
+    })
+  });
 
   stations.forEach(function(position) {
     stationMarkers.push(
