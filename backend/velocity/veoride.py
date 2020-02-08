@@ -90,7 +90,7 @@ def process_and_filter_bike_data(bike_data, user_loc):
 
 """ Returns: List of bikes and their data sorted by walking duration is ascending order
 """
-@app.route(f"{constants.VEORIDE_ENDPOINT_PREFIX}/get_nearby_bikes")
+@app.route(f"{constants.VEORIDE_ENDPOINT_PREFIX}/get_all_bikes")
 def veoride_get_nearby_bikes():
   num_bikes = int(request.args.get('num_bikes'))
   if not num_bikes:
@@ -109,35 +109,4 @@ def veoride_get_nearby_bikes():
   if bikes_result.status_code != 200:
     return jsonify({"error": "Error with fetching nearby bikes."}), 500
 
-  bike_data = bikes_result.json()['data']
-
-  if len(bike_data) == 0:
-    msg = f"No bikes found near ({user_lat}, {user_lng})"
-    print(msg)
-    return jsonify({"data": [], "message": msg}), 200
-  else:
-    processed_bike_data = process_and_filter_bike_data(bike_data, user_loc)
-    if processed_bike_data == None:
-      return jsonify({"error": "Error in getting bike data"}), 500
-    return jsonify({"data": processed_bike_data}), 200
-
-"""Returns: List of nearest bike stations ranked on walking distance
-"""
-@app.route(f"{constants.VEORIDE_ENDPOINT_PREFIX}/get_nearby_stations")
-def veoride_get_nearby_stations():
-  origin = request.args.get('origin')
-
-  walking_travel_info = get_walking_travel_info(origin, constants.BIKE_STATION_LOCATIONS)
-
-  if walking_travel_info == None:
-    return jsonify({"error": "Error in getting station data"}), 500
-
-  station_data = [None for _ in constants.BIKE_STATION_LOCATIONS]
-  for i, travel_info in enumerate(walking_travel_info):
-    station = {}
-    station["lat"], station["lng"]= constants.BIKE_STATION_LOCATIONS[i][0], constants.BIKE_STATION_LOCATIONS[i][1]
-    station["walking_time"] = travel_info["duration"]
-    station_data[i] = station
-
-  station_data.sort(key=lambda data: data["walking_time"])
-  return jsonify({"data": station_data}), 200
+  return bikes_result.json()['data']
