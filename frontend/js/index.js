@@ -10,9 +10,10 @@ var walkLeg;
 var bikeLeg;
 var currentRoute;
 var currentPosition;
-const collegeStation = {lat: 30.617592, lgn: -96.338644};
+var map;
+const collegeStation = {lat: 30.617592, lng: -96.338644};
 
-const get_bikes = (lat, lng) => Promise((resolve, reject) => {
+const getNearbyBikes2 = (lat, lng) => new Promise(resolve => {
   $.ajaxSetup({
     headers: {
       Authorization: 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ',
@@ -21,13 +22,15 @@ const get_bikes = (lat, lng) => Promise((resolve, reject) => {
 
   $.get(
     `https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat=${lat}&lng=${lng}`,
-    function(data) {
-      resolve(data);
-    },
+    (response) => { console.log(response); resolve(response.data); },
     'json'
   );
 });
 
+const processBikeResponse = data => {
+  console.log(data);
+  return data;
+}
 
 const make_circle = center =>
   new google.maps.Circle({
@@ -266,27 +269,13 @@ const stations = [
 
 
 function initMap() {
-  const map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById('map'), {
     zoom: 15,
     center: {
       lat: stations[13][0],
       lng: stations[13][1],
     },
   });
-
-  function displayBikeSuggestion() {
-    var bikeTime = bikeRoute.routes[0].legs[0].duration;
-    $('#bikeMsg').text('Bike route is: ' + bikeTime['text']);
-    updateCurrent();
-    $('#bike-better-popup').show();
-  }
-
-  const parking = {
-    url: iconBase + 'parking_lot_maps.png',
-    scaledSize: new google.maps.Size(30, 30),
-    origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(0, 0),
-  };
 
   const bike = {
     url: 'cycling.png',
@@ -352,8 +341,7 @@ function initMap() {
       minimumClusterSize: 10,
     });
   };
-  getNearbyBikes(pos.lat, pos.lng)
-  .then(showBikeMarkers)
-  .catch(alert);
-
+  getNearbyBikes2(collegeStation.lat, collegeStation.lng)
+    .then(showBikeMarkers)
+    .catch(alert);
 }
