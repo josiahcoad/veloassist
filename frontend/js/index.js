@@ -514,7 +514,7 @@ function initMap() {
             lng,
           },
           map: map,
-          icon: bike,
+          icon: {url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"},
         });
         bikeMarker.addListener('click', () => chooseBike(bikeMarker));
         bikeMarkers.push(bikeMarker);
