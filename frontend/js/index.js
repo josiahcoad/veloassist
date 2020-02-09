@@ -11,26 +11,40 @@ var bikeLeg;
 var currentRoute;
 var currentPosition;
 var map;
-const collegeStation = {lat: 30.617592, lng: -96.338644};
+const collegeStation = { lat: 30.617592, lng: -96.338644 };
 
-const getNearbyBikes2 = (lat, lng) => new Promise(resolve => {
-  $.ajaxSetup({
-    headers: {
-      Authorization: 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ',
-    },
+const getNearbyBikes = (lat, lng) =>
+  new Promise((resolve, reject) => {
+    $.ajaxSetup({
+      headers: {
+        Authorization:
+          'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ',
+      },
+    });
+
+    $.get(
+      `https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat=${lat}&lng=${lng}`,
+      resp => {
+        resp.code == 0 ? resolve(resp.data) : reject(resp.error);
+      },
+      'json'
+    );
   });
 
+const getStations = () =>
   $.get(
-    `https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat=${lat}&lng=${lng}`,
-    (response) => { console.log(response); resolve(response.data); },
+    `http://127.0.0.1:5000/stations`,
+    resp => {
+      console.log(resp);
+      resp.status == 200 ? resolve(resp.data) : reject(resp.error);
+    },
     'json'
   );
-});
 
 const processBikeResponse = data => {
   console.log(data);
   return data;
-}
+};
 
 const make_circle = center =>
   new google.maps.Circle({
@@ -45,8 +59,36 @@ const make_circle = center =>
     radius: 30,
   });
 
+// Show bikes on map
+const showBikeMarkers = data => {
+  const bikeMarkers = [];
+  for (var i = 1; i < data.length; i++) {
+    const bike_data = data[i];
+    const lock_open = bike_data.lockStatus;
+    if (lock_open) {
+      const lat = bike_data.location.lat;
+      const lng = bike_data.location.lng;
+      const bikeMarker = new google.maps.Marker({
+        position: {
+          lat,
+          lng,
+        },
+        map: map,
+        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' },
+      });
+      bikeMarkers.push(bikeMarker);
+    }
+  }
+  new MarkerClusterer(map, bikeMarkers, {
+    imagePath:
+      'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+    gridSize: 30,
+    minimumClusterSize: 10,
+  });
+};
+
 const iconBase =
-'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
+  'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
 
 const stations = [
   [30.6229431, -96.3369853],
@@ -267,7 +309,6 @@ const stations = [
   [30.626811987000053, -96.32059815699995],
 ];
 
-
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 15,
@@ -277,71 +318,28 @@ function initMap() {
     },
   });
 
-  const bike = {
-    url: 'cycling.png',
-    scaledSize: new google.maps.Size(30, 30),
-    origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(0, 0),
-  };
-
-  
+  // show circles around each station
   stations.forEach(center => {
     const circle = make_circle(center);
-    google.maps.event.addListener(circle, 'radius_changed', function() {
+    google.maps.event.addListener(circle, 'radius_changed', function(center) {
+      console.log(center);
       console.log(circle.getRadius());
     });
   });
-  
+
   const stationMarkers = [];
 
   stations.forEach(function(position) {
     stationMarkers.push(
       new google.maps.Marker({
         position: new google.maps.LatLng(position[0], position[1]),
-        //icon: parking,
         map: map,
-        zindex: 10,
-        visible: false,
       })
     );
   });
 
-  // Set visible station markers
-  google.maps.event.addListener(map, 'zoom_changed', function() {
-    var zoom = map.getZoom();
-    for (i = 0; i < stationMarkers.length; i++) {
-      stationMarkers[i].setVisible(zoom >= 15);
-    }
-  });
-
   // Show bikes on map
-  const showBikeMarkers = data => {
-    const bikeMarkers = [];
-    for (var i = 1; i < data.length; i++) {
-      const bike_data = data[i];
-      const lock_open = bike_data.lockStatus;
-      if (lock_open) {
-        const lat = bike_data.location.lat;
-        const lng = bike_data.location.lng;
-        const bikeMarker = new google.maps.Marker({
-          position: {
-            lat,
-            lng,
-          },
-          map: map,
-          icon: {url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"},
-        });
-        bikeMarkers.push(bikeMarker);
-      }
-    }
-    new MarkerClusterer(map, bikeMarkers, {
-      imagePath:
-        'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-      gridSize: 30,
-      minimumClusterSize: 10,
-    });
-  };
-  getNearbyBikes2(collegeStation.lat, collegeStation.lng)
+  getNearbyBikes(collegeStation.lat, collegeStation.lng)
     .then(showBikeMarkers)
     .catch(alert);
 }
