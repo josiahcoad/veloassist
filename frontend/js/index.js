@@ -79,9 +79,6 @@ const showBikeMarkers = data => {
   });
 };
 
-const iconBase =
-  'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
-
 
 async function initMap() {
   let stations;
