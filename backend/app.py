@@ -1,5 +1,4 @@
 from slackclient import SlackClient
-import json
 from flask import Flask, jsonify, request
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -49,16 +48,16 @@ def get_full_stations(stations, buffers, bikes, thresholds):
 def get_stations():
     try:
         with open("stations.csv") as file:
-            data = jsonify([[int(num) for num in line.split(',')] for line in file.readlines()])
-            return json.dumps({'data': data}), 200, {'ContentType': 'application/json'}
-    except:
-        return json.dumps({'error': 'Unknown'}), 500, {'ContentType': 'application/json'}
+            data = [[float(num) for num in line.split(',')] for line in file.readlines()]
+            return jsonify({'data': data}), 200
+    except Exception as e:
+        return jsonify({'error': e}), 500
 
 def write_stations(stations):
     print(stations)
     with open("stations.csv", "w") as file:
         file.write(stations)
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+    return jsonify({'success': True}), 200
 
 
 @app.route('/')
