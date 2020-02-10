@@ -33,16 +33,29 @@ const getNearbyBikes = (lat, lng) =>
 
 const getStations = () => $.get(`http://127.0.0.1:5000/stations`);
 
-const writeStations = stations =>
-  $.post(`http://127.0.0.1:5000/stations`, stations);
-
 const updateStation = station =>
-  $.put(`http://127.0.0.1:5000/stations`, station);
+  $.ajax({
+    url: `http://127.0.0.1:5000/station`,
+    type: 'POST',
+    data: JSON.stringify(station),
+    contentType: 'application/json',
+  });
 
-const processBikeResponse = data => {
-  console.log(data);
-  return data;
-};
+const tagBikes = (stations, bikes) =>
+  $.ajax({
+    url: `http://127.0.0.1:5000/bike_tags`,
+    type: 'POST',
+    data: JSON.stringify({ stations, bikes }),
+    contentType: 'application/json',
+  });
+
+const stationCounts = (stations, bikes) =>
+  $.ajax({
+    url: `http://127.0.0.1:5000/station_counts`,
+    type: 'POST',
+    data: JSON.stringify({ stations, bikes }),
+    contentType: 'application/json',
+  });
 
 const make_circle = station =>
   new google.maps.Circle({
@@ -54,7 +67,7 @@ const make_circle = station =>
     fillOpacity: 0.35,
     map: map,
     center: { lat: station.lat, lng: station.lng },
-    radius: 30,
+    radius: station.radius,
   });
 
 // Show bikes on map
@@ -85,16 +98,16 @@ const showBikeMarkers = data => {
   });
 };
 
-async function initMap() {
-  let stations;
-  try {
-    const response = await getStations();
-    stations = response.data;
-    console.log(stations)
-  } catch (e) {
-    console.log(e);
-  }
+const showStationMarkers = stations =>
+  // show circles around each station
+  stations.forEach(station => {
+    const circle = make_circle(station);
+    google.maps.event.addListener(circle, 'radius_changed', () => {
+      updateStation({ ...station, radius: circle.getRadius() });
+    });
+  });
 
+async function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 15,
     center: {
@@ -103,17 +116,16 @@ async function initMap() {
     },
   });
 
-  // show circles around each station
-  stations.forEach(station => {
-    const circle = make_circle(station);
-    google.maps.event.addListener(circle, 'radius_changed', () => {
-      // updateStation({ ...station, radius: circle.getRadius() });
-      writeStations(stations);
-    });
-  });
+  // show stations on map
+  const stations = await getStations().then(response => response.data);
+  showStationMarkers(stations);
 
   // Show bikes on map
-  getNearbyBikes(collegeStation.lat, collegeStation.lng)
-    .then(showBikeMarkers)
-    .catch(alert);
+  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
+  showBikeMarkers(bikes);
+
+  // Get tagged bikes
+  const data = await stationCounts(stations, bikes).then(
+    response => response.data
+  );
 }
