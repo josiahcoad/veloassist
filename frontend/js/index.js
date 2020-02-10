@@ -33,12 +33,18 @@ const getNearbyBikes = (lat, lng) =>
 
 const getStations = () => $.get(`http://127.0.0.1:5000/stations`);
 
+const writeStations = stations =>
+  $.post(`http://127.0.0.1:5000/stations`, stations);
+
+const updateStation = station =>
+  $.put(`http://127.0.0.1:5000/stations`, station);
+
 const processBikeResponse = data => {
   console.log(data);
   return data;
 };
 
-const make_circle = center =>
+const make_circle = station =>
   new google.maps.Circle({
     editable: true,
     strokeColor: '#FF0000',
@@ -47,7 +53,7 @@ const make_circle = center =>
     fillColor: '#FF0000',
     fillOpacity: 0.35,
     map: map,
-    center: { lat: center[0], lng: center[1] },
+    center: { lat: station.lat, lng: station.lng },
     radius: 30,
   });
 
@@ -79,12 +85,12 @@ const showBikeMarkers = data => {
   });
 };
 
-
 async function initMap() {
   let stations;
   try {
     const response = await getStations();
     stations = response.data;
+    console.log(stations)
   } catch (e) {
     console.log(e);
   }
@@ -98,11 +104,11 @@ async function initMap() {
   });
 
   // show circles around each station
-  stations.forEach(center => {
-    const circle = make_circle(center);
-    google.maps.event.addListener(circle, 'radius_changed', function(center) {
-      console.log(center);
-      console.log(circle.getRadius());
+  stations.forEach(station => {
+    const circle = make_circle(station);
+    google.maps.event.addListener(circle, 'radius_changed', () => {
+      // updateStation({ ...station, radius: circle.getRadius() });
+      writeStations(stations);
     });
   });
 
