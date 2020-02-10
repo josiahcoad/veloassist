@@ -73,6 +73,12 @@ def read_database():
     return json.loads(content or '{}')
 
 
+def read_database_single(id):
+    items = read_database()
+    matched = [item for item in items if item['id'] == id]
+    return matched[0] if len(matched) > 0 else None
+
+
 def write_database(data):
     with open(database_uri, 'w') as file:
         file.write(data)
@@ -85,76 +91,51 @@ def update_database(update):
     write_database(json.dumps(new_items, indent=2))
 
 
-# Handle formatting HTTP response
-def get_stations():
-    stations = read_database()
-    return jsonify({'data': stations}), 200
-
-
-def write_stations(stations):
-    write_database(stations)
-    return jsonify({'success': True}), 200
-
-
-def update_station(station):
-    update_database(station)
-    return jsonify({'success': True}), 200
-
-
-def get_station(id):
-    stations = read_database()
-    station = [station for station in stations if station['id'] == id]
-    station = station[0] if len(station) > 0 else None
-    return jsonify({'data': station}), 200
-
-
 # API Endpoints
-@app.route('/')
-def test():
-    return 'working'
-
-
 @app.route('/stations', methods=['GET', 'POST'])
 def stations():
     if request.method == 'GET':
-        return get_stations()
+        stations = read_database()
+        return jsonify({'data': stations}), 200
     elif request.method == 'POST':
         stations = request.json
-        return write_stations(stations)
+        write_database(stations)
+        return jsonify({'success': True}), 200
 
 
 @app.route('/station', methods=['GET', 'POST'])
 def station():
     if request.method == 'GET':
         id = request.json
-        return get_station(id)
+        station = read_database_single(id)
+        return jsonify({'data': station}), 200
     elif request.method == 'POST':
         station = request.json
-        print('station')
-        print(station)
-        return update_station(station)
+        update_database(station)
+        return jsonify({'success': True}), 200
 
 
-@app.route('/bike_tags', methods=['POST'])
-def bike_tags():
-    data = request.json
+def get_bike_tags(data):
+    # parse
     stations = data['stations']
     bikes = [(b['location']['lat'], b['location']['lng'])
              for b in data['bikes']]
     buffers = [station['radius'] for station in stations]
     centers = [(s['lat'], s['lng']) for s in stations]
-    bike_tags = tag_bikes(centers, buffers, bikes)
+    # compute
+    return tag_bikes(centers, buffers, bikes)
+
+
+@app.route('/bike_tags', methods=['POST'])
+def bike_tags():
+    data = request.json
+    bike_tags = get_bike_tags(data)
     return jsonify({'data': np_dumps(bike_tags)}), 200
 
 
 @app.route('/station_counts', methods=['POST'])
 def station_counts():
     data = request.json
-    stations = data['stations']
-    bikes = [(b['location']['lat'], b['location']['lng'])
-             for b in data['bikes']]
-    buffers = [station['radius'] for station in stations]
-    centers = [(s['lat'], s['lng']) for s in stations]
-    bike_tags = tag_bikes(centers, buffers, bikes)
+    bike_tags = get_bike_tags(data)
     station_counts = get_station_counts(bike_tags)
     return jsonify({'data': np_dumps(station_counts)}), 200
