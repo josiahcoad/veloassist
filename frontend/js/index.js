@@ -109,17 +109,6 @@ async function initMap() {
     });
   });
 
-  const stationMarkers = [];
-
-  stations.forEach(function(position) {
-    stationMarkers.push(
-      new google.maps.Marker({
-        position: new google.maps.LatLng(position[0], position[1]),
-        map: map,
-      })
-    );
-  });
-
   // Show bikes on map
   getNearbyBikes(collegeStation.lat, collegeStation.lng)
     .then(showBikeMarkers)
