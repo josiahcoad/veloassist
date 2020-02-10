@@ -2,8 +2,10 @@ from slackclient import SlackClient
 from flask import Flask, jsonify, request
 import numpy as np
 from scipy.spatial.distance import cdist
+import json
 app = Flask(__name__)
 
+database_uri = 'stations.json'
 
 slack_token = "xoxb-940798258294-938614448069-Zh1bacFPLBDaWRhBDauqh4Jn"
 sc = SlackClient(slack_token)
@@ -45,18 +47,34 @@ def get_full_stations(stations, buffers, bikes, thresholds):
     return station_counts >= thresholds
 
 
+def read_database():
+    with open(database_uri) as file:
+        return json.loads(file.read())
+
+
+def write_database(data):
+    with open(database_uri, 'w') as file:
+        file.write(data)
+
+
+def update_database(update):
+    items = read_database()
+    new_items = [item if item.id != update.id else update for item in items]
+    write_database(new_items)
+
+
 def get_stations():
-    try:
-        with open("stations.csv") as file:
-            data = [[float(num) for num in line.split(',')] for line in file.readlines()]
-            return jsonify({'data': data}), 200
-    except Exception as e:
-        return jsonify({'error': e}), 500
+    stations = read_database()
+    return jsonify({'data': stations}), 200
+
 
 def write_stations(stations):
-    print(stations)
-    with open("stations.csv", "w") as file:
-        file.write(stations)
+    write_database(stations)
+    return jsonify({'success': True}), 200
+
+
+def update_station(station):
+    update_database(station)
     return jsonify({'success': True}), 200
 
 
@@ -65,13 +83,16 @@ def test():
     return 'working'
 
 
-@app.route('/stations', methods=['GET', 'POST'])
+@app.route('/stations', methods=['GET', 'POST', 'PUT'])
 def stations():
     if request.method == 'GET':
         return get_stations()
-    else:
+    elif request.method == 'POST':
         stations = request.json
         return write_stations(stations)
+    elif request.method == 'PUT':
+        station = request.json
+        return update_station(station)
 
 
 @app.route('/bike_tags', methods=['POST'])
