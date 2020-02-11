@@ -3,14 +3,15 @@ from flask import Flask, jsonify, request
 import numpy as np
 from scipy.spatial.distance import cdist
 import math
-
+from os import environ
 import json
 import requests
 app = Flask(__name__)
 
 database_uri = 'stations.json'
 
-slack_token = "xoxb-940798258294-938614448069-Zh1bacFPLBDaWRhBDauqh4Jn"
+slack_token = environ.get('SLACK_API_KEY')
+assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
 sc = SlackClient(slack_token)
 
 
@@ -32,6 +33,7 @@ def haversine(coord1, coord2):
 
 # JSON Serialize Numpy
 class NpEncoder(json.JSONEncoder):
+    # pylint: disable=method-hidden
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -45,18 +47,6 @@ class NpEncoder(json.JSONEncoder):
 
 def np_dumps(data):
     return json.loads(json.dumps(data, cls=NpEncoder))
-
-
-# Slack
-def build_notification_text(station):
-    return "Too many bikes at " + station
-
-
-def post_slack_message(text):
-    sc.api_call(
-        "chat.postMessage",
-        channel="#bike-share",
-        text=text)
 
 
 # Core functionality
@@ -172,3 +162,18 @@ def station_counts():
     data = request.json
     station_counts = get_station_counts(data)
     return jsonify({'data': np_dumps(station_counts)}), 200
+
+
+@app.route('/slack_message', methods=['POST'])
+def post_slack_message():
+    data = request.json
+    try:
+        response = sc.api_call(
+            "chat.postMessage",
+            channel="#bike-share",
+            text="Too many bikes at " + data['station'])
+        if not response['ok']:
+            return jsonify({'success': False, 'error': response['error']}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': e}), 500
+    return jsonify({'success': True}), 200
