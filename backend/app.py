@@ -6,9 +6,9 @@ import math
 from os import environ
 import json
 import requests
-app = Flask(__name__)
+from . import db
 
-database_uri = 'stations.json'
+app = Flask(__name__)
 
 slack_token = environ.get('SLACK_API_KEY')
 assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
@@ -75,40 +75,15 @@ def get_full_stations(stations, buffers, bikes, thresholds):
     return station_counts >= thresholds
 
 
-# Database Utils
-def read_database():
-    with open(database_uri) as file:
-        content = file.read()
-    return json.loads(content or '{}')
-
-
-def read_database_single(id):
-    items = read_database()
-    matched = [item for item in items if item['id'] == id]
-    return matched[0] if len(matched) > 0 else None
-
-
-def write_database(data):
-    with open(database_uri, 'w') as file:
-        file.write(data)
-
-
-def update_database(update):
-    items = read_database()
-    new_items = [update if item['id'] ==
-                 update['id'] else item for item in items]
-    write_database(json.dumps(new_items, indent=2))
-
-
 # API Endpoints
 @app.route('/stations', methods=['GET', 'POST'])
 def stations():
     if request.method == 'GET':
-        stations = read_database()
+        stations = db.read_database()
         return jsonify({'data': stations}), 200
     elif request.method == 'POST':
         stations = request.json
-        write_database(stations)
+        db.write_database(stations)
         return jsonify({'success': True}), 200
 
 
@@ -116,11 +91,11 @@ def stations():
 def station():
     if request.method == 'GET':
         id = request.json
-        station = read_database_single(id)
+        station = db.read_database_single(id)
         return jsonify({'data': station}), 200
     elif request.method == 'POST':
         station = request.json
-        update_database(station)
+        db.update_database(station)
         return jsonify({'success': True}), 200
 
 
@@ -139,7 +114,9 @@ def get_bikes():
     return jsonify({'data': body['data']}), 200
 
 
-def get_bike_tags(data):
+@app.route('/bike_tags', methods=['POST'])
+def bike_tags():
+    data = request.json
     # parse
     stations = data['stations']
     bikes = [(b['location']['lat'], b['location']['lng'])
@@ -147,13 +124,7 @@ def get_bike_tags(data):
     buffers = [station['radius'] for station in stations]
     centers = [(s['lat'], s['lng']) for s in stations]
     # compute
-    return tag_bikes(centers, buffers, bikes)
-
-
-@app.route('/bike_tags', methods=['POST'])
-def bike_tags():
-    data = request.json
-    bike_tags = get_bike_tags(data)
+    bike_tags = tag_bikes(centers, buffers, bikes)
     return jsonify({'data': np_dumps(bike_tags)}), 200
 
 
