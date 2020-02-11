@@ -113,7 +113,7 @@ const sortByKey = (array, key) =>
 
 const showStationMarkers = stations =>
   // show circles around each station
-  stations.forEach((station, idx) => {
+  stations.forEach(station => {
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       updateStation({ ...station, radius: circle.getRadius() });
