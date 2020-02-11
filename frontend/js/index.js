@@ -12,58 +12,46 @@ var currentRoute;
 var currentPosition;
 var map;
 const collegeStation = { lat: 30.617592, lng: -96.338644 };
+const apiurl = 'http://127.0.0.1:5000';
+
+const makeMarkerIcon = (num, color) =>
+  `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
+
+const getRandomColor = () =>
+  '#' + Math.floor(Math.random() * 16777215).toString(16);
+
+const getRandomColorArray = n => Array.from({ length: n }, getRandomColor);
+
+const colorArray = getRandomColorArray(15);
 
 const getNearbyBikes = (lat, lng) =>
-  new Promise((resolve, reject) => {
-    $.ajaxSetup({
-      headers: {
-        Authorization:
-          'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ',
-      },
-    });
+  $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`);
 
-    $.get(
-      `https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat=${lat}&lng=${lng}`,
-      resp => {
-        resp.code == 0 ? resolve(resp.data) : reject(resp.error);
-      },
-      'json'
-    );
-  });
+const getStations = () => $.get(`${apiurl}/stations`);
 
-const getStations = () => $.get(`http://127.0.0.1:5000/stations`);
-
-const updateStation = station =>
+const post = (url, data) =>
   $.ajax({
-    url: `http://127.0.0.1:5000/station`,
+    url,
     type: 'POST',
-    data: JSON.stringify(station),
+    data,
     contentType: 'application/json',
   });
+
+const updateStation = station => post(`${apiurl}/station`, station);
 
 const tagBikes = (stations, bikes) =>
-  $.ajax({
-    url: `http://127.0.0.1:5000/bike_tags`,
-    type: 'POST',
-    data: JSON.stringify({ stations, bikes }),
-    contentType: 'application/json',
-  });
+  post(`${apiurl}/bike_tags`, JSON.stringify({ stations, bikes }));
 
 const stationCounts = (stations, bikes) =>
-  $.ajax({
-    url: `http://127.0.0.1:5000/station_counts`,
-    type: 'POST',
-    data: JSON.stringify({ stations, bikes }),
-    contentType: 'application/json',
-  });
+  post(`${apiurl}/station_counts`, JSON.stringify({ stations, bikes }));
 
-const make_circle = station =>
+const makeStationCircle = station =>
   new google.maps.Circle({
     editable: true,
-    strokeColor: '#FF0000',
+    strokeColor: colorArray[station.id],
     strokeOpacity: 0.8,
     strokeWeight: 2,
-    fillColor: '#FF0000',
+    fillColor: colorArray[station.id],
     fillOpacity: 0.35,
     map: map,
     center: { lat: station.lat, lng: station.lng },
@@ -71,24 +59,26 @@ const make_circle = station =>
   });
 
 // Show bikes on map
-const showBikeMarkers = data => {
+const showBikeMarkers = (bikes, bikeTags) => {
   const bikeMarkers = [];
-  for (var i = 1; i < data.length; i++) {
-    const bike_data = data[i];
-    const lock_open = bike_data.lockStatus;
-    if (lock_open) {
-      const lat = bike_data.location.lat;
-      const lng = bike_data.location.lng;
-      const bikeMarker = new google.maps.Marker({
-        position: {
-          lat,
-          lng,
+  for (var i = 1; i < bikes.length; i++) {
+    const bike = bikes[i];
+    const lockOpen = bike.lockStatus;
+    if (!lockOpen) continue;
+    const lat = bike.location.lat;
+    const lng = bike.location.lng;
+    const stationNum = bikeTags[i];
+    const color =
+      stationNum == -1 ? 'ffffff' : colorArray[stationNum].substr(1);
+    bikeMarkers.push(
+      new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        icon: {
+          url: makeMarkerIcon(stationNum + 1, color),
         },
-        map: map,
-        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' },
-      });
-      bikeMarkers.push(bikeMarker);
-    }
+      })
+    );
   }
   new MarkerClusterer(map, bikeMarkers, {
     imagePath:
@@ -101,7 +91,7 @@ const showBikeMarkers = data => {
 const showStationMarkers = stations =>
   // show circles around each station
   stations.forEach(station => {
-    const circle = make_circle(station);
+    const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       updateStation({ ...station, radius: circle.getRadius() });
     });
@@ -121,11 +111,13 @@ async function initMap() {
   showStationMarkers(stations);
 
   // Show bikes on map
-  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
-  showBikeMarkers(bikes);
-
+  const bikes = await getNearbyBikes(
+    collegeStation.lat,
+    collegeStation.lng
+  ).then(response => response.data);
   // Get tagged bikes
-  const data = await stationCounts(stations, bikes).then(
+  const bikeTags = await tagBikes(stations, bikes).then(
     response => response.data
   );
+  showBikeMarkers(bikes, bikeTags);
 }
