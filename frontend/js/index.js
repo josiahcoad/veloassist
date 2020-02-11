@@ -25,25 +25,40 @@ const getRandomColorArray = n => Array.from({ length: n }, getRandomColor);
 const colorArray = getRandomColorArray(15);
 
 const getNearbyBikes = (lat, lng) =>
-  $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`);
+  $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`).then(
+    response => response.data
+  );
 
-const getStations = () => $.get(`${apiurl}/stations`);
+const getStations = () =>
+  $.get(`${apiurl}/stations`).then(response => response.data);
 
 const post = (url, data) =>
   $.ajax({
     url,
     type: 'POST',
-    data,
+    data: JSON.stringify(data),
     contentType: 'application/json',
-  });
+  }).then(response => response.data);
 
 const updateStation = station => post(`${apiurl}/station`, station);
 
 const tagBikes = (stations, bikes) =>
-  post(`${apiurl}/bike_tags`, JSON.stringify({ stations, bikes }));
+  post(`${apiurl}/bike_tags`, { stations, bikes });
 
-const stationCounts = (stations, bikes) =>
-  post(`${apiurl}/station_counts`, JSON.stringify({ stations, bikes }));
+const getStationCounts = bikeTags => post(`${apiurl}/station_counts`, bikeTags);
+
+const addCircleInfo = (circle, content) => {
+  var infoWindow = new google.maps.InfoWindow({
+    content,
+    position: circle['center'],
+  });
+  google.maps.event.addListener(circle, 'mouseover', function(ev) {
+    infoWindow.open(map);
+  });
+  google.maps.event.addListener(circle, 'mouseout', function(ev) {
+    infoWindow.close();
+  });
+};
 
 const makeStationCircle = station =>
   new google.maps.Circle({
@@ -53,7 +68,7 @@ const makeStationCircle = station =>
     strokeWeight: 2,
     fillColor: colorArray[station.id],
     fillOpacity: 0.35,
-    map: map,
+    map,
     center: { lat: station.lat, lng: station.lng },
     radius: station.radius,
   });
@@ -88,13 +103,19 @@ const showBikeMarkers = (bikes, bikeTags) => {
   });
 };
 
-const showStationMarkers = stations =>
+const showStationMarkers = (stations, stationCounts) =>
   // show circles around each station
-  stations.forEach(station => {
+  stations.forEach((station, idx) => {
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       updateStation({ ...station, radius: circle.getRadius() });
     });
+    const pctFull = Math.round((stationCounts[idx] / station.capacity) * 100);
+    const exclaim = pctFull >= 100 ? '!!' : '';
+    addCircleInfo(
+      circle,
+      `Station at ${pctFull}% capacity${exclaim} (${stationCounts[idx]}/${station.capacity})`
+    );
   });
 
 async function initMap() {
@@ -107,17 +128,13 @@ async function initMap() {
   });
 
   // show stations on map
-  const stations = await getStations().then(response => response.data);
-  showStationMarkers(stations);
-
+  const stations = await getStations();
   // Show bikes on map
-  const bikes = await getNearbyBikes(
-    collegeStation.lat,
-    collegeStation.lng
-  ).then(response => response.data);
+  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
   // Get tagged bikes
-  const bikeTags = await tagBikes(stations, bikes).then(
-    response => response.data
-  );
+  const bikeTags = await tagBikes(stations, bikes);
   showBikeMarkers(bikes, bikeTags);
+  // Get station counts
+  const stationCounts = await getStationCounts(bikeTags);
+  showStationMarkers(stations, stationCounts);
 }

@@ -153,6 +153,5 @@ def bike_tags():
 @app.route('/station_counts', methods=['POST'])
 def station_counts():
     data = request.json
-    bike_tags = get_bike_tags(data)
-    station_counts = get_station_counts(bike_tags)
+    station_counts = get_station_counts(data)
     return jsonify({'data': np_dumps(station_counts)}), 200
