@@ -2,9 +2,10 @@ from slackclient import SlackClient
 from flask import Flask, jsonify, request
 import numpy as np
 from scipy.spatial.distance import cdist
+import math
+
 import json
 import requests
-from geopy.distance import distance as geodist
 app = Flask(__name__)
 
 database_uri = 'stations.json'
@@ -12,6 +13,21 @@ database_uri = 'stations.json'
 slack_token = "xoxb-940798258294-938614448069-Zh1bacFPLBDaWRhBDauqh4Jn"
 sc = SlackClient(slack_token)
 
+
+# Distance between two lat/lng points in meters
+def haversine(coord1, coord2):
+    R = 6372800  # Earth radius in meters
+    lat1, lon1 = coord1
+    lat2, lon2 = coord2
+    
+    phi1, phi2 = math.radians(lat1), math.radians(lat2) 
+    dphi       = math.radians(lat2 - lat1)
+    dlambda    = math.radians(lon2 - lon1)
+    
+    a = math.sin(dphi/2)**2 + \
+        math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+    
+    return 2*R*math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 # JSON Serialize Numpy
 class NpEncoder(json.JSONEncoder):
@@ -45,7 +61,7 @@ def post_slack_message(text):
 # Core functionality
 def tag_bikes(stations, buffers, bikes):
     buffers = np.array(buffers).reshape(-1, 1)
-    dists = cdist(stations, bikes, lambda u, v: geodist(u, v).m)
+    dists = cdist(stations, bikes, haversine)
     in_buffer = dists <= buffers
     masked = np.where(in_buffer, dists, np.Inf)
     outliers = ~np.any(in_buffer, axis=0)
