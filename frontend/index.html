@@ -13,9 +13,7 @@
   </head>
 
   <body class="body">
-
     <div>
-
       <!-- Popup box for bike trips being better -->
       <div id="bike-better-popup" class="div-block-2" style="display: none;">
         <img
@@ -30,7 +28,9 @@
         <div id="bikeMsg" class="text-block-2">
           Drive time: 10 minutes
         </div>
-        <a href="#" class="button w-button" id="showBikeRoute">Switch to bike</a>
+        <a href="#" class="button w-button" id="showBikeRoute"
+          >Switch to bike</a
+        >
       </div>
 
       <!-- Route time div -->
@@ -45,83 +45,7 @@
       >
         <div class="container w-container">
           <nav role="navigation" class="nav-menu w-nav-menu">
-            <img
-              src="img/velocity.png"
-              width="343"
-              alt=""
-              class="image-2"
-            />
-
-            <div class="w-form">
-              <div
-                name="Route to Parking Station"
-              >
-                <label class="w-checkbox checkbox-field"
-                  ><input
-                    type="checkbox"
-                    id="closest-checkbox"
-                    data-name="Route to Parking Station"
-                    class="w-checkbox-input checkbox"
-                  /><span class="checkbox-label-2 w-form-label"
-                    >Route to parking station</span
-                  ></label
-                >
-              </div>
-            </div>
-            
-            <div>
-              <div class="w-form">
-                <div
-                  data-name="Bike Map Layers"
-                  class="form"
-                >
-                  <label class="w-checkbox checkbox-field"
-                    ><input
-                      type="checkbox"
-                      id="traffic-layer-checkbox"
-                      data-name="Traffic Layer Checkbox"
-                      class="w-checkbox-input checkbox"
-                    /><span class="checkbox-label-2 w-form-label"
-                      >Traffic layer</span
-                    ></label
-                  >
-                  <label class="w-checkbox checkbox-field-2"
-                    ><input
-                      type="checkbox"
-                      id="bike-path-checkbox"
-                      data-name="Bike Path Layer"
-                      class="w-checkbox-input checkbox-2"
-                    /><span class="checkbox-label w-form-label"
-                      >Bike path layer</span
-                    >
-                  </label>
-                </div>
-              </div>
-              <div class="search w-form">
-                <div class="container-2 w-container"></div>
-                <div>
-                  <input
-                    class="search-input w-input"
-                    placeholder="Choose starting point..."
-                    id="start"
-                    required=""
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <div class="search w-form">
-                <div class="container-2 w-container"></div>
-                <div>
-                  <input
-                    class="search-input w-input"
-                    placeholder="Choose destination..."
-                    id="end"
-                    required=""
-                  />
-                </div>
-              </div>
-            </div>
+            <img src="img/velocity.png" width="343" alt="" class="image-2" />
             <div style="padding-right: 5px; padding-left: 5px;">
               <div id="bikeLayerInfo"></div>
               <div id="right-panel"></div>
@@ -162,7 +86,7 @@
     <!-- Custom JS Files -->
     <script src="js/webflow.js"></script>
     <script src="js/index.js"></script>
-    
+
     <!--Load the API from the specified URL
     * The async attribute allows the browser to render the page while the API loads
     * The key parameter will contain your own API key (which is not needed for this tutorial)
