@@ -17,12 +17,7 @@ const apiurl = 'http://127.0.0.1:5000';
 const makeMarkerIcon = (num, color) =>
   `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
 
-const getRandomColor = () =>
-  '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-const getRandomColorArray = n => Array.from({ length: n }, getRandomColor);
-
-const colorArray = getRandomColorArray(15);
+const colorArray = ['05668D', '427AA1', '679436', 'A5BE00', '4E598C', 'FCAF58', 'FF8C42', 'FFAE03', 'E67F0D', 'FE4E00', 'E9190F', 'FF0F80', '008BF8', '04E762', 'DC0073']
 
 const getNearbyBikes = (lat, lng) =>
   $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`).then(
@@ -63,10 +58,10 @@ const addCircleInfo = (circle, content) => {
 const makeStationCircle = station =>
   new google.maps.Circle({
     editable: true,
-    strokeColor: colorArray[station.id],
+    strokeColor: '#' + colorArray[station.id],
     strokeOpacity: 0.8,
     strokeWeight: 2,
-    fillColor: colorArray[station.id],
+    fillColor: '#' + colorArray[station.id],
     fillOpacity: 0.35,
     map,
     center: { lat: station.lat, lng: station.lng },
@@ -84,7 +79,7 @@ const showBikeMarkers = (bikes, bikeTags) => {
     const lng = bike.location.lng;
     const stationNum = bikeTags[i];
     const color =
-      stationNum == -1 ? 'ffffff' : colorArray[stationNum].substr(1);
+      stationNum == -1 ? 'ffffff' : colorArray[stationNum];
     bikeMarkers.push(
       new google.maps.Marker({
         position: { lat, lng },
