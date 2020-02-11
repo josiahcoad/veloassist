@@ -1,102 +1,5 @@
-// Initialize and add the map
-var showTrafficLayer = false;
-var showBikingLayer = false;
-var showDirectionPanel = true;
-var closestStation = false;
-var displayRoute;
-var bikeRoute;
-var carRoute;
-var walkLeg;
-var bikeLeg;
-var currentRoute;
-var currentPosition;
+// Initialize map
 var map;
-const collegeStation = { lat: 30.617592, lng: -96.338644 };
-const apiurl = 'http://127.0.0.1:5000';
-
-const makeMarkerIcon = (num, color) =>
-  `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
-
-const colorArray = ['05668D', '427AA1', '679436', 'A5BE00', '4E598C', 'FCAF58', 'FF8C42', 'FFAE03', 'E67F0D', 'FE4E00', 'E9190F', 'FF0F80', '008BF8', '04E762', 'DC0073']
-
-const getNearbyBikes = (lat, lng) =>
-  $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`).then(
-    response => response.data
-  );
-
-const getStations = () =>
-  $.get(`${apiurl}/stations`).then(response => response.data);
-
-const post = (url, data) =>
-  $.ajax({
-    url,
-    type: 'POST',
-    data: JSON.stringify(data),
-    contentType: 'application/json',
-  }).then(response => response.data);
-
-const updateStation = station => post(`${apiurl}/station`, station);
-
-const tagBikes = (stations, bikes) =>
-  post(`${apiurl}/bike_tags`, { stations, bikes });
-
-const getStationCounts = bikeTags => post(`${apiurl}/station_counts`, bikeTags);
-
-const addCircleInfo = (circle, content) => {
-  var infoWindow = new google.maps.InfoWindow({
-    content,
-    position: circle['center'],
-  });
-  google.maps.event.addListener(circle, 'mouseover', function(ev) {
-    infoWindow.open(map);
-  });
-  google.maps.event.addListener(circle, 'mouseout', function(ev) {
-    infoWindow.close();
-  });
-};
-
-const makeStationCircle = station =>
-  new google.maps.Circle({
-    editable: true,
-    strokeColor: '#' + colorArray[station.id],
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: '#' + colorArray[station.id],
-    fillOpacity: 0.35,
-    map,
-    center: { lat: station.lat, lng: station.lng },
-    radius: station.radius,
-  });
-
-// Show bikes on map
-const showBikeMarkers = (bikes, bikeTags) => {
-  const bikeMarkers = [];
-  for (var i = 1; i < bikes.length; i++) {
-    const bike = bikes[i];
-    const lockOpen = bike.lockStatus;
-    if (!lockOpen) continue;
-    const lat = bike.location.lat;
-    const lng = bike.location.lng;
-    const stationNum = bikeTags[i];
-    const color =
-      stationNum == -1 ? 'ffffff' : colorArray[stationNum];
-    bikeMarkers.push(
-      new google.maps.Marker({
-        position: { lat, lng },
-        map,
-        icon: {
-          url: makeMarkerIcon(stationNum + 1, color),
-        },
-      })
-    );
-  }
-  new MarkerClusterer(map, bikeMarkers, {
-    imagePath:
-      'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-    gridSize: 30,
-    minimumClusterSize: 10,
-  });
-};
 
 // Sort array of json objects by key
 const sortByKey = (array, key) =>
@@ -106,35 +9,11 @@ const sortByKey = (array, key) =>
     return x < y ? -1 : x > y ? 1 : 0;
   });
 
-const showStationMarkers = stations =>
-  // show circles around each station
-  stations.forEach(station => {
-    const circle = makeStationCircle(station);
-    google.maps.event.addListener(circle, 'radius_changed', () => {
-      updateStation({ ...station, radius: circle.getRadius() });
-    });
-    const pctFull = Math.round((station.count / station.capacity) * 100);
-    const exclaim = pctFull >= 100 ? '!!' : '';
-    addCircleInfo(
-      circle,
-      `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`
-    );
-  });
-
-const addListItem = station => {
-  const pctFull = Math.round((station.count / station.capacity) * 100);
-  const exclaim = pctFull >= 100 ? '!!' : '';
-  const text = `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`;
-  const stationList = document.getElementById('station-list');
-  const newItem = document.createElement('li');
-  newItem.className = 'station-list-item';
-  newItem.innerText = text;
-  stationList.appendChild(newItem);
-};
-
 async function initMap() {
+  const collegeStation = { lat: 30.617592, lng: -96.338644 };
+
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 15,
+    zoom: 16,
     center: {
       lat: collegeStation.lat,
       lng: collegeStation.lng,
