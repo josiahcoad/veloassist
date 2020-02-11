@@ -13,29 +13,8 @@
   </head>
 
   <body class="body">
+
     <div>
-      <!-- Popup box for bike trips being better -->
-      <div id="bike-better-popup" class="div-block-2" style="display: none;">
-        <img
-          src="img/x.png"
-          width="10"
-          height="10"
-          alt=""
-          class="image-4"
-          id="bike-better-popup-cross"
-        />
-        <div class="text-block">We found a faster route for you!</div>
-        <div id="bikeMsg" class="text-block-2">
-          Drive time: 10 minutes
-        </div>
-        <a href="#" class="button w-button" id="showBikeRoute"
-          >Switch to bike</a
-        >
-      </div>
-
-      <!-- Route time div -->
-      <div class="text-block-3" id="current-route-info">Current route: N/A</div>
-
       <!-- Sliding overlay window -->
       <div
         data-collapse="all"
@@ -63,26 +42,7 @@
     </div>
 
     <div id="map"></div>
-    <!--<p id="bikeLayerInfo"></p>-->
-
-    <!--
-    <div id="floating-panel">
-      <input type="text" id="start" placeholder="Start" />
-      <input type="text" id="end" placeholder="End" />
-    </div>
-    <button class="button" id="showBikeRoute">Show Bike Route</button>
-    <button class="button" id="showDirections">Show Directions</button>
-    <button class="button" id="showTraffic">Show Traffic</button>
-    <button class="button" id="showBikeLayer">Show Bike</button>
-    <br />
-    <div id="bikeMsg"></div>
-    <br />
-    <br />
-    <div id="right-panel"></div>
-    <div id="map"></div>
-    <p id="bikeLayerInfo"></p>
-    -->
-
+   
     <!-- JS Library Includes -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
@@ -90,7 +50,7 @@
     <!-- Custom JS Files -->
     <script src="js/webflow.js"></script>
     <script src="js/index.js"></script>
-
+    
     <!--Load the API from the specified URL
     * The async attribute allows the browser to render the page while the API loads
     * The key parameter will contain your own API key (which is not needed for this tutorial)
