@@ -3,6 +3,8 @@ from flask import Flask, jsonify, request
 import numpy as np
 from scipy.spatial.distance import cdist
 import json
+import requests
+from geopy.distance import distance as geodist
 app = Flask(__name__)
 
 database_uri = 'stations.json'
@@ -25,7 +27,7 @@ class NpEncoder(json.JSONEncoder):
 
 
 def np_dumps(data):
-    return json.dumps(data, cls=NpEncoder)
+    return json.loads(json.dumps(data, cls=NpEncoder))
 
 
 # Slack
@@ -43,7 +45,7 @@ def post_slack_message(text):
 # Core functionality
 def tag_bikes(stations, buffers, bikes):
     buffers = np.array(buffers).reshape(-1, 1)
-    dists = cdist(stations, bikes)
+    dists = cdist(stations, bikes, lambda u, v: geodist(u, v).m)
     in_buffer = dists <= buffers
     masked = np.where(in_buffer, dists, np.Inf)
     outliers = ~np.any(in_buffer, axis=0)
@@ -113,6 +115,21 @@ def station():
         station = request.json
         update_database(station)
         return jsonify({'success': True}), 200
+
+
+@app.route('/bikes', methods=['GET'])
+def get_bikes():
+    lat = request.args.get('lat')
+    lng = request.args.get('lng')
+    if lat is None or lng is None:
+        return jsonify({'error': 'Must provide lat and lng in query params'}), 400
+    header = {'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ'}
+    url = f'https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat={lat}&lng={lng}'
+    response = requests.get(url, headers=header)
+    if response.status_code != 200:
+        return jsonify({'error': 'Error in calling veoride api'}), 500
+    body = response.json()
+    return jsonify({'data': body['data']}), 200
 
 
 def get_bike_tags(data):
