@@ -103,20 +103,39 @@ const showBikeMarkers = (bikes, bikeTags) => {
   });
 };
 
-const showStationMarkers = (stations, stationCounts) =>
+// Sort array of json objects by key
+const sortByKey = (array, key) =>
+  array.sort(function(a, b) {
+    var x = a[key];
+    var y = b[key];
+    return x < y ? -1 : x > y ? 1 : 0;
+  });
+
+const showStationMarkers = stations =>
   // show circles around each station
   stations.forEach((station, idx) => {
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       updateStation({ ...station, radius: circle.getRadius() });
     });
-    const pctFull = Math.round((stationCounts[idx] / station.capacity) * 100);
+    const pctFull = Math.round((station.count / station.capacity) * 100);
     const exclaim = pctFull >= 100 ? '!!' : '';
     addCircleInfo(
       circle,
-      `Station at ${pctFull}% capacity${exclaim} (${stationCounts[idx]}/${station.capacity})`
+      `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`
     );
   });
+
+const addListItem = station => {
+  const pctFull = Math.round((station.count / station.capacity) * 100);
+  const exclaim = pctFull >= 100 ? '!!' : '';
+  const text = `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`;
+  const stationList = document.getElementById('station-list');
+  const newItem = document.createElement('li');
+  newItem.className = 'station-list-item';
+  newItem.innerText = text;
+  stationList.appendChild(newItem);
+};
 
 async function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
@@ -128,7 +147,7 @@ async function initMap() {
   });
 
   // show stations on map
-  const stations = await getStations();
+  let stations = await getStations();
   // Show bikes on map
   const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
   // Get tagged bikes
@@ -136,5 +155,10 @@ async function initMap() {
   showBikeMarkers(bikes, bikeTags);
   // Get station counts
   const stationCounts = await getStationCounts(bikeTags);
-  showStationMarkers(stations, stationCounts);
+  stations = stations.map((station, idx) => ({
+    ...station,
+    count: stationCounts[idx],
+  }));
+  showStationMarkers(stations);
+  stations.forEach(addListItem);
 }
