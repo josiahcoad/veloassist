@@ -80,7 +80,7 @@ def post_slack_message():
         response = sc.api_call(
             "chat.postMessage",
             channel="#bike-share",
-            text="Too many bikes at " + data['station'])
+            text=data['text'])
         if not response['ok']:
             return jsonify({'success': False, 'error': response['error']}), 500
     except Exception as e:

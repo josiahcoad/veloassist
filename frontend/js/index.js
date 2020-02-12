@@ -10,6 +10,16 @@ const sortByKey = (array, key) =>
     return x < y ? -1 : x > y ? 1 : 0;
   });
 
+const sendMessageSlack = stations => {
+  const fill = station => ({
+    ...station,
+    fill: Math.round((station.occupancy / station.capacity) * 100),
+  });
+  const full = stations.map(fill).filter(s => s.fill >= 100)[0];
+  const text = `Station ${full.id} at (${full.lat}, ${full.lng}) is at ${full.fill}% capacity! (${full.occupancy}/${full.capacity})`;
+  messageSlack(text);
+};
+
 const writeMap = async () => {
   // show stations on map
   let stations = await getStations();

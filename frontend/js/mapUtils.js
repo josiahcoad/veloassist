@@ -19,9 +19,6 @@ const colorArray = [
   'DC0073',
 ];
 
-const circleMoved = (station, newcenter) = {
-
-}
 const showStationMarkers = stations =>
   // show circles around each station
   stations.forEach(station => {

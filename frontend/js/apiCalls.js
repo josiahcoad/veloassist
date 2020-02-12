@@ -22,3 +22,5 @@ const tagBikes = (stations, bikes) =>
   post(`${apiurl}/bike_tags`, { stations, bikes });
 
 const getStationOccupancies = bikeTags => post(`${apiurl}/station_occupancies`, bikeTags);
+
+const messageSlack = text => post(`${apiurl}/slack_message`, { text });
