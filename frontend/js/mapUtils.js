@@ -24,10 +24,13 @@ const showStationMarkers = stations =>
   stations.forEach(station => {
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
-      updateStation({ ...station, radius: circle.getRadius() });
+      const radius = circle.getRadius();
+      updateStation({ ...station, radius }).then(refreshMap);
     });
     google.maps.event.addListener(circle, 'center_changed', () => {
-      circleMoved({ ...station, radius: circle.getCenter() });
+      const lat = circle.getCenter().lat();
+      const lng = circle.getCenter().lng();
+      updateStation({ ...station, lat, lng }).then(refreshMap);
     });
     const pctFull = Math.round((station.occupancy / station.capacity) * 100);
     const exclaim = pctFull >= 100 ? '!!' : '';
@@ -90,4 +93,22 @@ const showBikeMarkers = (bikes, bikeTags) => {
     gridSize: 30,
     minimumClusterSize: 10,
   });
+};
+
+const writeMap = async () => {
+  // show stations on map
+  let stations = await getStations();
+  // Show bikes on map
+  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
+  // Get tagged bikes
+  const bikeTags = await tagBikes(stations, bikes);
+  showBikeMarkers(bikes, bikeTags);
+  // Get station occupancy
+  const occupancies = await getStationOccupancies(bikeTags);
+  stations = stations.map((station, idx) => ({
+    ...station,
+    occupancy: occupancies[idx],
+  }));
+  showStationMarkers(stations);
+  stations.forEach(addListItem);
 };
