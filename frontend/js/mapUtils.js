@@ -1,18 +1,3 @@
-const showStationMarkers = stations =>
-  // show circles around each station
-  stations.forEach(station => {
-    const circle = makeStationCircle(station);
-    google.maps.event.addListener(circle, 'radius_changed', () => {
-      updateStation({ ...station, radius: circle.getRadius() });
-    });
-    const pctFull = Math.round((station.count / station.capacity) * 100);
-    const exclaim = pctFull >= 100 ? '!!' : '';
-    addCircleInfo(
-      circle,
-      `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`
-    );
-  });
-
 const makeMarkerIcon = (num, color) =>
   `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
 
@@ -33,6 +18,27 @@ const colorArray = [
   '04E762',
   'DC0073',
 ];
+
+const circleMoved = (station, newcenter) = {
+
+}
+const showStationMarkers = stations =>
+  // show circles around each station
+  stations.forEach(station => {
+    const circle = makeStationCircle(station);
+    google.maps.event.addListener(circle, 'radius_changed', () => {
+      updateStation({ ...station, radius: circle.getRadius() });
+    });
+    google.maps.event.addListener(circle, 'center_changed', () => {
+      circleMoved({ ...station, radius: circle.getCenter() });
+    });
+    const pctFull = Math.round((station.occupancy / station.capacity) * 100);
+    const exclaim = pctFull >= 100 ? '!!' : '';
+    addCircleInfo(
+      circle,
+      `Station at ${pctFull}% capacity${exclaim} (${station.occupancy}/${station.capacity})`
+    );
+  });
 
 const addCircleInfo = (circle, content) => {
   var infoWindow = new google.maps.InfoWindow({

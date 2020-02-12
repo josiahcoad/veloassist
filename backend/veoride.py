@@ -49,15 +49,15 @@ def tag_bikes(stations, buffers, bikes):
     return bike_tags
 
 
-def get_station_counts(bike_tags):
-    count = np.zeros(max(bike_tags)+1).astype(np.int64)
+def get_station_occupancies(bike_tags):
+    occupancies = np.zeros(max(bike_tags)+1).astype(np.int64)
     for x in bike_tags:
         if x != -1:  # -1 is the tag for an outlier
-            count[x] += 1
-    return count
+            occupancies[x] += 1
+    return occupancies
 
 
 def get_full_stations(stations, buffers, bikes, thresholds):
     bike_tags = tag_bikes(stations, buffers, bikes)
-    station_counts = get_station_counts(bike_tags)
-    return station_counts >= thresholds
+    station_occupancies = get_station_occupancies(bike_tags)
+    return station_occupancies >= thresholds

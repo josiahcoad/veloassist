@@ -1,5 +1,6 @@
 // Initialize map
 var map;
+const collegeStation = { lat: 30.617592, lng: -96.338644 };
 
 // Sort array of json objects by key
 const sortByKey = (array, key) =>
@@ -9,17 +10,7 @@ const sortByKey = (array, key) =>
     return x < y ? -1 : x > y ? 1 : 0;
   });
 
-async function initMap() {
-  const collegeStation = { lat: 30.617592, lng: -96.338644 };
-
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 16,
-    center: {
-      lat: collegeStation.lat,
-      lng: collegeStation.lng,
-    },
-  });
-
+const writeMap = async () => {
   // show stations on map
   let stations = await getStations();
   // Show bikes on map
@@ -27,12 +18,23 @@ async function initMap() {
   // Get tagged bikes
   const bikeTags = await tagBikes(stations, bikes);
   showBikeMarkers(bikes, bikeTags);
-  // Get station counts
+  // Get station occupancy
   const stationCounts = await getStationCounts(bikeTags);
   stations = stations.map((station, idx) => ({
     ...station,
-    count: stationCounts[idx],
+    occupancy: stationCounts[idx],
   }));
   showStationMarkers(stations);
   stations.forEach(addListItem);
+};
+
+async function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 16,
+    center: {
+      lat: collegeStation.lat,
+      lng: collegeStation.lng,
+    },
+  });
+  writeMap();
 }
