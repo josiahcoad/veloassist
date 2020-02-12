@@ -25,12 +25,12 @@ const showStationMarkers = stations =>
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       const radius = circle.getRadius();
-      updateStation({ ...station, radius }).then(refreshMap);
+      updateStation({ ...station, radius });
     });
     google.maps.event.addListener(circle, 'center_changed', () => {
       const lat = circle.getCenter().lat();
       const lng = circle.getCenter().lng();
-      updateStation({ ...station, lat, lng }).then(refreshMap);
+      updateStation({ ...station, lat, lng });
     });
     const pctFull = Math.round((station.occupancy / station.capacity) * 100);
     const exclaim = pctFull >= 100 ? '!!' : '';
@@ -75,8 +75,8 @@ const showBikeMarkers = (bikes, bikeTags) => {
     if (!lockOpen) continue;
     const lat = bike.location.lat;
     const lng = bike.location.lng;
-    const stationNum = bikeTags[i];
-    const color = stationNum == -1 ? 'ffffff' : colorArray[stationNum];
+    const stationNum = bikeTags[i] + 1;
+    const color = stationNum == 0 ? 'ffffff' : colorArray[stationNum];
     bikeMarkers.push(
       new google.maps.Marker({
         position: { lat, lng },
