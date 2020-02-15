@@ -4,9 +4,9 @@ const addListItem = station => {
   const text = `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`;
   const newElement = 
   `<button type="button" class="collapsible">Station ${station.id}</button>
-  <div class="content"> 
-    <p>${text}</p> 
-  </div>`;
+    <div class="content"> 
+      <p>${text}</p> 
+    </div>`;
   const stationList = $('#station-list');
   stationList.append(newElement);
 };
