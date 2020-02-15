@@ -21,4 +21,6 @@ const updateStation = station => post(`${apiurl}/station`, station);
 const tagBikes = (stations, bikes) =>
   post(`${apiurl}/bike_tags`, { stations, bikes });
 
-const getStationCounts = bikeTags => post(`${apiurl}/station_counts`, bikeTags);
+const getStationOccupancies = bikeTags => post(`${apiurl}/station_occupancies`, bikeTags);
+
+const messageSlack = text => post(`${apiurl}/slack_message`, { text });

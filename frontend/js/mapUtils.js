@@ -1,18 +1,3 @@
-const showStationMarkers = stations =>
-  // show circles around each station
-  stations.forEach(station => {
-    const circle = makeStationCircle(station);
-    google.maps.event.addListener(circle, 'radius_changed', () => {
-      updateStation({ ...station, radius: circle.getRadius() });
-    });
-    const pctFull = Math.round((station.count / station.capacity) * 100);
-    const exclaim = pctFull >= 100 ? '!!' : '';
-    addCircleInfo(
-      circle,
-      `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`
-    );
-  });
-
 const makeMarkerIcon = (num, color) =>
   `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
 
@@ -33,6 +18,27 @@ const colorArray = [
   '04E762',
   'DC0073',
 ];
+
+const showStationMarkers = stations =>
+  // show circles around each station
+  stations.forEach(station => {
+    const circle = makeStationCircle(station);
+    google.maps.event.addListener(circle, 'radius_changed', () => {
+      const radius = circle.getRadius();
+      updateStation({ ...station, radius });
+    });
+    google.maps.event.addListener(circle, 'center_changed', () => {
+      const lat = circle.getCenter().lat();
+      const lng = circle.getCenter().lng();
+      updateStation({ ...station, lat, lng });
+    });
+    const pctFull = Math.round((station.occupancy / station.capacity) * 100);
+    const exclaim = pctFull >= 100 ? '!!' : '';
+    addCircleInfo(
+      circle,
+      `Station at ${pctFull}% capacity${exclaim} (${station.occupancy}/${station.capacity})`
+    );
+  });
 
 const addCircleInfo = (circle, content) => {
   var infoWindow = new google.maps.InfoWindow({
@@ -69,8 +75,8 @@ const showBikeMarkers = (bikes, bikeTags) => {
     if (!lockOpen) continue;
     const lat = bike.location.lat;
     const lng = bike.location.lng;
-    const stationNum = bikeTags[i];
-    const color = stationNum == -1 ? 'ffffff' : colorArray[stationNum];
+    const stationNum = bikeTags[i] + 1;
+    const color = stationNum == 0 ? 'ffffff' : colorArray[stationNum];
     bikeMarkers.push(
       new google.maps.Marker({
         position: { lat, lng },
@@ -87,4 +93,22 @@ const showBikeMarkers = (bikes, bikeTags) => {
     gridSize: 30,
     minimumClusterSize: 10,
   });
+};
+
+const writeMap = async () => {
+  // show stations on map
+  let stations = await getStations();
+  // Show bikes on map
+  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
+  // Get tagged bikes
+  const bikeTags = await tagBikes(stations, bikes);
+  showBikeMarkers(bikes, bikeTags);
+  // Get station occupancy
+  const occupancies = await getStationOccupancies(bikeTags);
+  stations = stations.map((station, idx) => ({
+    ...station,
+    occupancy: occupancies[idx],
+  }));
+  showStationMarkers(stations);
+  stations.forEach(addListItem);
 };

@@ -1,5 +1,5 @@
 const addListItem = station => {
-  const pctFull = Math.round((station.count / station.capacity) * 100);
+  const pctFull = Math.round((station.occupancy / station.capacity) * 100);
   const exclaim = pctFull >= 100 ? '!!' : '';
   const text = `Station at ${pctFull}% capacity${exclaim} (${station.count}/${station.capacity})`;
   const newElement = 

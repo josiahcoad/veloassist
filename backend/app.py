@@ -66,11 +66,11 @@ def bike_tags():
     return jsonify({'data': vr.np_dumps(bike_tags)}), 200
 
 
-@app.route('/station_counts', methods=['POST'])
-def station_counts():
+@app.route('/station_occupancies', methods=['POST'])
+def station_occupancies():
     data = request.json
-    station_counts = vr.get_station_counts(data)
-    return jsonify({'data': vr.np_dumps(station_counts)}), 200
+    station_occupancies = vr.get_station_occupancies(data)
+    return jsonify({'data': vr.np_dumps(station_occupancies)}), 200
 
 
 @app.route('/slack_message', methods=['POST'])
@@ -80,7 +80,7 @@ def post_slack_message():
         response = sc.api_call(
             "chat.postMessage",
             channel="#bike-share",
-            text="Too many bikes at " + data['station'])
+            text=data['text'])
         if not response['ok']:
             return jsonify({'success': False, 'error': response['error']}), 500
     except Exception as e:
