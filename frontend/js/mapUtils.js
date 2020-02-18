@@ -95,6 +95,22 @@ const showBikeMarkers = (bikes, bikeTags) => {
   });
 };
 
+const addListItem = station => {
+  const pctFull = Math.round((station.occupancy / station.capacity) * 100);
+  const newElement = 
+  `<button class="accordion">
+    <span class="right">${pctFull}%</span>
+    <span class="left">Station ${station.id}</span>
+  </button>
+  <div class="panel">
+    <p class="center">Current: ${station.occupancy}
+      <span class="left">Min: 5</span>
+      <span class="right">Max: ${station.capacity}</span></p>
+  </div>`;
+  const stationList = $('.station-list');
+  stationList.append(newElement);
+};
+
 const writeMap = async () => {
   // show stations on map
   let stations = await getStations();
@@ -111,4 +127,20 @@ const writeMap = async () => {
   }));
   showStationMarkers(stations);
   stations.forEach(addListItem);
-};
+
+  // show stations in panel
+  var acc = document.getElementsByClassName("accordion");
+  var i;
+  for (i = 0; i < acc.length; i++) {
+    acc[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+  
+      var panel = this.nextElementSibling;
+      if (panel.style.display === "block") {
+        panel.style.display = "none";
+      } else {
+        panel.style.display = "block";
+      }
+    });
+  }
+}

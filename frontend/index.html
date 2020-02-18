@@ -8,41 +8,16 @@
         width: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="css/webflow.css" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
   </head>
 
   <body class="body">
 
-    <div>
-      <!-- Sliding overlay window -->
-      <div
-        data-collapse="all"
-        data-animation="over-left"
-        data-duration="400"
-        class="navbar w-nav"
-      >
-        <div class="container w-container">
-          <nav role="navigation" class="nav-menu w-nav-menu">
-            <img src="img/velocity.png" width="343" alt="" class="image-2" />
-            <button type="button" class="collapsible">Open Collapsible</button>
-            <div class="station-list">
-              <p>Testing 123...</p>
-            </div>
-            <ul class="list" id="station-list">
-            </ul>
-            <div style="padding-right: 5px; padding-left: 5px;">
-              <div id="bikeLayerInfo"></div>
-              <div id="right-panel"></div>
-            </div>
-          
-          </nav>
-          <div class="menu-button w-nav-button">
-            <div class="icon w-icon-nav-menu"></div>
-          </div>
-        </div>
+    <div class="sidenav">
+      <div class="station-list">
       </div>
     </div>
+  
 
     <div id="map"></div>
    
@@ -53,7 +28,6 @@
     <!-- Custom JS Files -->
     <script src="js/webflow.js"></script>
     <script src="js/apiCalls.js"></script>
-    <script src="js/dom.js"></script>
     <script src="js/mapUtils.js"></script>
     <script src="js/index.js"></script>
     
