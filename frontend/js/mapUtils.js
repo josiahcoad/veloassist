@@ -66,27 +66,25 @@ const makeStationCircle = station =>
     radius: station.radius,
   });
 
+const makeBikeMarker = bike => {
+  const lat = bike.location.lat;
+  const lng = bike.location.lng;
+  const stationNum = bike.station + 1;
+  const color = stationNum == 0 ? 'ffffff' : colorArray[stationNum];
+  return new google.maps.Marker({
+    position: { lat, lng },
+    map,
+    icon: {
+      url: makeMarkerIcon(stationNum + 1, color),
+    },
+  });
+};
+
+const lockClosed = bike => bike.lockStatus;
+
 // Show bikes on map
-const showBikeMarkers = (bikes, bikeTags) => {
-  const bikeMarkers = [];
-  for (var i = 1; i < bikes.length; i++) {
-    const bike = bikes[i];
-    const lockOpen = bike.lockStatus;
-    if (!lockOpen) continue;
-    const lat = bike.location.lat;
-    const lng = bike.location.lng;
-    const stationNum = bikeTags[i] + 1;
-    const color = stationNum == 0 ? 'ffffff' : colorArray[stationNum];
-    bikeMarkers.push(
-      new google.maps.Marker({
-        position: { lat, lng },
-        map,
-        icon: {
-          url: makeMarkerIcon(stationNum + 1, color),
-        },
-      })
-    );
-  }
+const showBikeMarkers = bikes => {
+  const bikeMarkers = bikes.filter(lockClosed).map(makeBikeMarker);
   new MarkerClusterer(map, bikeMarkers, {
     imagePath:
       'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
@@ -97,8 +95,7 @@ const showBikeMarkers = (bikes, bikeTags) => {
 
 const addListItem = station => {
   const pctFull = Math.round((station.occupancy / station.capacity) * 100);
-  const newElement = 
-  `<button class="accordion">
+  const newElement = `<button class="accordion">
     <span class="right">${pctFull}%</span>
     <span class="left">Station ${station.id}</span>
   </button>
@@ -112,35 +109,24 @@ const addListItem = station => {
 };
 
 const writeMap = async () => {
-  // show stations on map
-  let stations = await getStations();
-  // Show bikes on map
-  const bikes = await getNearbyBikes(collegeStation.lat, collegeStation.lng);
-  // Get tagged bikes
-  const bikeTags = await tagBikes(stations, bikes);
-  showBikeMarkers(bikes, bikeTags);
-  // Get station occupancy
-  const occupancies = await getStationOccupancies(bikeTags);
-  stations = stations.map((station, idx) => ({
-    ...station,
-    occupancy: occupancies[idx],
-  }));
+  const { bikes, stations } = await getStationsAndBikes();
+  showBikeMarkers(bikes);
   showStationMarkers(stations);
   stations.forEach(addListItem);
 
   // show stations in panel
-  var acc = document.getElementsByClassName("accordion");
+  var acc = document.getElementsByClassName('accordion');
   var i;
   for (i = 0; i < acc.length; i++) {
-    acc[i].addEventListener("click", function() {
-      this.classList.toggle("active");
-  
+    acc[i].addEventListener('click', function() {
+      this.classList.toggle('active');
+
       var panel = this.nextElementSibling;
-      if (panel.style.display === "block") {
-        panel.style.display = "none";
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
       } else {
-        panel.style.display = "block";
+        panel.style.display = 'block';
       }
     });
   }
-}
+};
