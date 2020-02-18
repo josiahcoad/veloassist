@@ -106,6 +106,7 @@ const addListItem = station => {
         <span class="left">Min: 5</span>
         <span class="right">Max: ${station.capacity}</span></p>
     </div>
+    <hr class="nospace" />
   </div>`;
   $('.station-list').append(newElement);
 };
@@ -114,14 +115,14 @@ const addAccordianEffect = () => {
   $('.accordion-wrap').click(function() {
     $('.panel').slideUp();
     $(this)
-      .children()
-      .last()
+      .find('.panel')
+      .first()
       .slideToggle();
   });
 };
 
 function centerMap(lat, lng) {
-  map.setCenter({ lat, lng });
+  map.panTo({ lat, lng });
   map.setZoom(18);
 }
 

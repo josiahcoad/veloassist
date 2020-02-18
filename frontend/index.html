@@ -2,6 +2,10 @@
 <html>
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat&display=swap"
+      rel="stylesheet"
+    />
     <style>
       #map {
         height: 600px;
@@ -12,15 +16,13 @@
   </head>
 
   <body class="body">
-
     <div class="sidenav">
-      <div class="station-list">
-      </div>
+      <h1 class="center">Veloassist</h1>
+      <div class="station-list"></div>
     </div>
-  
 
     <div id="map"></div>
-   
+
     <!-- JS Library Includes -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
@@ -30,7 +32,7 @@
     <script src="js/apiCalls.js"></script>
     <script src="js/mapUtils.js"></script>
     <script src="js/index.js"></script>
-    
+
     <!--Load the API from the specified URL
     * The async attribute allows the browser to render the page while the API loads
     * The key parameter will contain your own API key (which is not needed for this tutorial)

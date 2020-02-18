@@ -5,7 +5,7 @@
 }
 
 #right-panel {
-  font-family: "Roboto", "sans-serif";
+  font-family: 'Roboto', 'sans-serif';
   line-height: 30px;
 }
 
@@ -60,7 +60,8 @@
 }
 
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .accordion:hover {
+.active,
+.accordion:hover {
   background-color: #ccc;
 }
 
@@ -72,16 +73,16 @@
   overflow: hidden;
 }
 
-.right{
-  float:right;
+.right {
+  float: right;
 }
 
-.left{
-  float:left;
+.left {
+  float: left;
 }
 
-.center{
-  text-align:center;
+.center {
+  text-align: center;
 }
 
 /* The sidebar menu */
@@ -92,9 +93,8 @@
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
   left: 0;
-  background-color: #111; /* Black */
+  background-color: #ffff; /* Black */
   overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
 }
 
 /* The navigation menu links */
@@ -117,3 +117,11 @@
   padding: 0px 10px;
 }
 
+h1 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+hr.nospace {
+  padding: 0px;
+  margin: 0px;
+}
