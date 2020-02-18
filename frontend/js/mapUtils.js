@@ -112,5 +112,5 @@ const writeMap = async () => {
   const { bikes, stations } = await getStationsAndBikes();
   showBikeMarkers(bikes);
   showStationMarkers(stations);
-  stations.forEach(addListItem);
+  sortByKey(stations, 'fill').reverse().forEach(addListItem);
 };

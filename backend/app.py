@@ -3,7 +3,6 @@ from flask import Flask, jsonify, request
 import numpy as np
 from os import environ
 import json
-import requests
 from . import db
 from . import veoride as vr
 
@@ -37,15 +36,6 @@ def station():
         return jsonify({'success': True}), 200
 
 
-def get_bikes_core(lat, lng):
-    header = {'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxOjU1MzQiLCJpYXQiOjE1Nzk5OTUzMTgsImV4cCI6MTU4Nzc3MTMxOH0.NNuurt6awK2ub3Athx0AqlIVNzTiWhZo_Xdi6zlrGXqDSJ17H2UIHpR8jtCiWC_XXgkQSWvpEsqgcesaSVlSnQ'}
-    url = f'https://manhattan-host.veoride.com:8444/api/customers/vehicles?lat={lat}&lng={lng}'
-    response = requests.get(url, headers=header)
-    if response.status_code != 200:
-        raise Exception('Error in calling veoride api')
-    return response.json()['data']
-
-
 @app.route('/bikes', methods=['GET'])
 def get_bikes():
     lat = request.args.get('lat')
@@ -53,7 +43,7 @@ def get_bikes():
     if lat is None or lng is None:
         return jsonify({'error': 'Must provide lat and lng in query params'}), 400
     try:
-        bikes = get_bikes_core(lat, lng)
+        bikes = vr.get_bikes_core(lat, lng)
     except Exception as e:
         return jsonify({'error': e}), 500
     return jsonify({'data': bikes}), 200
@@ -93,7 +83,7 @@ def post_slack_message():
 def get_bikes_and_stations():
     # get bikes in College Station
     cs = (30.617592, -96.338644)
-    bikes = get_bikes_core(*cs)
+    bikes = vr.get_bikes_core(*cs)
     # get stations
     stations = db.read_database()
     # tag bikes
@@ -104,8 +94,10 @@ def get_bikes_and_stations():
     # get station occupancies
     station_ids = [s['id'] for s in stations]
     occupancies = vr.get_station_occupancies(bike_tags, station_ids)
+    # calculate station fills
+    fills = vr.get_station_fill(stations, occupancies)
     # add data to objects
     bikes = [{**b, 'station': tag} for b, tag in zip(bikes, bike_tags)]
-    stations = [{**s, 'occupancy': occ}
-                for s, occ in zip(stations, occupancies)]
+    stations = [{**s, 'fill': fill, 'occupancy': occ}
+                for s, fill, occ in zip(stations, fills, occupancies)]
     return jsonify({'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}), 200

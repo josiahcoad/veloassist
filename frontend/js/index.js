@@ -11,11 +11,7 @@ const sortByKey = (array, key) =>
   });
 
 const sendMessageSlack = stations => {
-  const fill = station => ({
-    ...station,
-    fill: Math.round((station.occupancy / station.capacity) * 100),
-  });
-  const full = stations.map(fill).filter(s => s.fill >= 100)[0];
+  const full = stations.filter(s => s.fill >= 100)[0];
   const text = `Station ${full.id} at (${full.lat}, ${full.lng}) is at ${full.fill}% capacity! (${full.occupancy}/${full.capacity})`;
   messageSlack(text);
 };
@@ -29,5 +25,4 @@ async function initMap() {
     },
   });
   writeMap();
-
 }
