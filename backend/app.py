@@ -12,17 +12,6 @@ slack_token = environ.get('SLACK_API_KEY')
 assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
 sc = SlackClient(slack_token)
 
-# API Endpoints
-@app.route('/stations', methods=['GET', 'POST'])
-def stations():
-    if request.method == 'GET':
-        stations = db.read_database()
-        return jsonify({'data': stations}), 200
-    elif request.method == 'POST':
-        stations = request.json
-        db.write_database(stations)
-        return jsonify({'success': True}), 200
-
 
 @app.route('/station', methods=['GET', 'POST'])
 def station():
@@ -34,33 +23,6 @@ def station():
         station = request.json
         db.update_database(station)
         return jsonify({'success': True}), 200
-
-
-@app.route('/bikes', methods=['GET'])
-def get_bikes():
-    lat = request.args.get('lat')
-    lng = request.args.get('lng')
-    if lat is None or lng is None:
-        return jsonify({'error': 'Must provide lat and lng in query params'}), 400
-    try:
-        bikes = vr.get_bikes_core(lat, lng)
-    except Exception as e:
-        return jsonify({'error': e}), 500
-    return jsonify({'data': bikes}), 200
-
-
-@app.route('/bike_tags', methods=['POST'])
-def bike_tags():
-    data = request.json
-    # parse
-    stations = data['stations']
-    bikes = [(b['location']['lat'], b['location']['lng'])
-             for b in data['bikes']]
-    buffers = [station['radius'] for station in stations]
-    centers = [(s['lat'], s['lng']) for s in stations]
-    # compute
-    bike_tags = vr.tag_bikes(centers, buffers, bikes)
-    return jsonify({'data': vr.np_dumps(bike_tags)}), 200
 
 
 @app.route('/slack_message', methods=['POST'])
