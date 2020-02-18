@@ -94,9 +94,9 @@ const showBikeMarkers = bikes => {
 };
 
 const addListItem = station => {
-  const pctFull = Math.round((station.occupancy / station.capacity) * 100);
-  const newElement = `<button class="accordion">
-    <span class="right">${pctFull}%</span>
+  const pctFull = Math.round(station.fill * 100);
+  const newElement = `<button class="accordion" data-lat=${station.lat} data-lng=${station.lng}>
+    <span class="right">${pctFull}% (${station.occupancy}/${station.capacity})</span>
     <span class="left">Station ${station.id}</span>
   </button>
   <div class="panel">
@@ -104,13 +104,37 @@ const addListItem = station => {
       <span class="left">Min: 5</span>
       <span class="right">Max: ${station.capacity}</span></p>
   </div>`;
-  const stationList = $('.station-list');
-  stationList.append(newElement);
+  $('.station-list').append(newElement);
 };
+
+function centerMap(lat, lng) {
+  map.setCenter({ lat, lng });
+  map.setZoom(18);
+}
 
 const writeMap = async () => {
   const { bikes, stations } = await getStationsAndBikes();
   showBikeMarkers(bikes);
   showStationMarkers(stations);
-  sortByKey(stations, 'fill').reverse().forEach(addListItem);
+  sortByKey(stations, 'fill')
+    .reverse()
+    .forEach(addListItem);
+  $('.accordion').click(function() {
+    centerMap(parseFloat($(this).attr('data-lat')), parseFloat($(this).attr('data-lng')));
+  });
+  // show stations in panel
+  var acc = document.getElementsByClassName('accordion');
+  var i;
+  for (i = 0; i < acc.length; i++) {
+    acc[i].addEventListener('click', function() {
+      this.classList.toggle('active');
+
+      var panel = this.nextElementSibling;
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+      } else {
+        panel.style.display = 'block';
+      }
+    });
+  }
 };
