@@ -87,17 +87,11 @@ def get_bikes_and_stations():
     # get stations
     stations = db.read_database()
     # tag bikes
-    centers = [(s['lat'], s['lng']) for s in stations]
-    buffers = [s['radius'] for s in stations]
-    loc_bikes = [(b['location']['lat'], b['location']['lng']) for b in bikes]
-    bike_tags = vr.tag_bikes(centers, buffers, loc_bikes)
-    # get station occupancies
-    station_ids = [s['id'] for s in stations]
-    occupancies = vr.get_station_occupancies(bike_tags, station_ids)
-    # calculate station fills
-    fills = vr.get_station_fill(stations, occupancies)
+    bike_tags = vr.tag_bikes(stations, bikes)
+    # get/set station occupancies
+    stations = vr.get_station_occupancies(bike_tags, stations)
+    # get/set station fills
+    stations = vr.get_station_fill(stations)
     # add data to objects
     bikes = [{**b, 'station': tag} for b, tag in zip(bikes, bike_tags)]
-    stations = [{**s, 'fill': fill, 'occupancy': occ}
-                for s, fill, occ in zip(stations, fills, occupancies)]
     return jsonify({'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}), 200

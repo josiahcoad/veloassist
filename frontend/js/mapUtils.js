@@ -1,5 +1,5 @@
-const makeMarkerIcon = (num, color) =>
-  `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=${num}|${color}|000000`;
+const makeMarkerIcon = color =>
+  `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|${color}|000000`;
 
 const colorArray = [
   '05668D',
@@ -18,6 +18,19 @@ const colorArray = [
   '04E762',
   'DC0073',
 ];
+
+const makeStationCircle = station =>
+  new google.maps.Circle({
+    editable: true,
+    strokeColor: '#' + station.color,
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: '#' + station.color,
+    fillOpacity: 0.35,
+    map,
+    center: { lat: station.lat, lng: station.lng },
+    radius: station.radius,
+  });
 
 const showStationMarkers = stations =>
   // show circles around each station
@@ -53,29 +66,15 @@ const addCircleInfo = (circle, content) => {
   });
 };
 
-const makeStationCircle = station =>
-  new google.maps.Circle({
-    editable: true,
-    strokeColor: '#' + colorArray[station.id],
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: '#' + colorArray[station.id],
-    fillOpacity: 0.35,
-    map,
-    center: { lat: station.lat, lng: station.lng },
-    radius: station.radius,
-  });
-
 const makeBikeMarker = bike => {
   const lat = bike.location.lat;
   const lng = bike.location.lng;
-  const stationNum = bike.station + 1;
-  const color = stationNum == 0 ? 'ffffff' : colorArray[stationNum];
+  const color = bike.station ? colorArray[4 % colorArray.length] : 'ffffff';
   return new google.maps.Marker({
     position: { lat, lng },
     map,
     icon: {
-      url: makeMarkerIcon(stationNum + 1, color),
+      url: makeMarkerIcon(color),
     },
   });
 };
@@ -102,9 +101,9 @@ const addListItem = station => {
       <span class="left">Station ${station.id}</span>
     </button>
     <div class="panel">
-      <p class="center">Current: ${station.occupancy}
-        <span class="left">Min: 5</span>
-        <span class="right">Max: ${station.capacity}</span></p>
+      <p class="center">Id: ${station.id} </p>
+      </br>
+      <p class="center">Type: ${station.Type} </p>
     </div>
     <hr class="nospace" />
   </div>`;

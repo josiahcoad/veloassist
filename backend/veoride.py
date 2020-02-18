@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import json
 import requests
-
+from collections import Counter
 # Distance between two lat/lng points in meters
 
 
@@ -40,8 +40,9 @@ def np_dumps(data):
     return json.loads(json.dumps(data, cls=NpEncoder))
 
 
-# Math
-def tag_bikes(stations, buffers, bikes):
+# ----------- Math -----------
+def tag_bikes_core(stations, buffers, bikes):
+    """Return the tag as an 0-based index into the stations array"""
     buffers = np.array(buffers).reshape(-1, 1)
     dists = cdist(stations, bikes, haversine)
     in_buffer = dists <= buffers
@@ -52,17 +53,22 @@ def tag_bikes(stations, buffers, bikes):
     return bike_tags
 
 
-def get_station_occupancies(bike_tags, station_ids):
-    occupancies = np.zeros(max(station_ids)+1).astype(int)
-    for x in bike_tags:
-        if x != -1:  # -1 is the tag for an outlier
-            occupancies[x] += 1
-    return occupancies
+def tag_bikes(stations, bikes):
+    centers = [(s['lat'], s['lng']) for s in stations]
+    buffers = [s['radius'] for s in stations]
+    loc_bikes = [(b['location']['lat'], b['location']['lng']) for b in bikes]
+    bike_tags = tag_bikes_core(centers, buffers, loc_bikes)
+    return [None if tag == -1 else stations[tag]['id'] for tag in bike_tags]
 
 
-def get_station_fill(stations, occupancies):
-    return [occ / s['capacity'] if s['capacity']
-            else 0 for occ, s in zip(occupancies, stations)]
+def get_station_occupancies(bike_tags, stations):
+    c = Counter(bike_tags)
+    return [{**s, 'occupancy': c.get(s['id'], 0)} for s in stations]
+
+
+def get_station_fill(stations):
+    def f(s): return s['occupancy'] / s['capacity'] if s['capacity'] else 0
+    return [{**s, 'fill': f(s)} for s in stations]
 
 
 # Veoride API

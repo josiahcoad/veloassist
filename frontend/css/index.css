@@ -70,7 +70,9 @@
   padding: 0 18px;
   background-color: white;
   display: none;
+  font-family: 'Montserrat', sans-serif;
   overflow: hidden;
+  font-size: small;
 }
 
 .right {
@@ -124,4 +126,41 @@ h1 {
 hr.nospace {
   padding: 0px;
   margin: 0px;
+}
+
+.center-block {
+  margin: auto;
+  width: 50%;
+}
+
+/* Loader */
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #4285F4;
+  border-right: 16px solid #0F9D58;
+  border-bottom: 16px solid #DB4437;
+  border-left: 16px solid #F4B400;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

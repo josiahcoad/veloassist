@@ -24,5 +24,6 @@ async function initMap() {
       lng: collegeStation.lng,
     },
   });
-  writeMap();
+  await writeMap();
+  $(".loader").hide();
 }
