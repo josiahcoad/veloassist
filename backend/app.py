@@ -5,6 +5,7 @@ from os import environ
 import json
 from . import db
 from . import veoride as vr
+from time import perf_counter
 
 app = Flask(__name__)
 
@@ -43,6 +44,7 @@ def post_slack_message():
 # API Endpoint Highlevel
 @app.route('/bikes_stations', methods=['GET'])
 def get_bikes_and_stations():
+    start = perf_counter()
     # get bikes in College Station
     cs = (30.617592, -96.338644)
     bikes = vr.get_bikes_core(*cs)
@@ -56,4 +58,6 @@ def get_bikes_and_stations():
     stations = vr.get_station_fill(stations)
     # add data to objects
     bikes = [{**b, 'station': tag} for b, tag in zip(bikes, bike_tags)]
+    end = perf_counter()
+    print("Time is:", round(end-start, 2))
     return jsonify({'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}), 200
