@@ -1,25 +1,26 @@
 import math
 import numpy as np
-from scipy.spatial.distance import cdist
 import json
 import requests
 from collections import Counter
 # Distance between two lat/lng points in meters
 
+import numpy as np
 
-def haversine(coord1, coord2):
-    R = 6372800  # Earth radius in meters
-    lat1, lon1 = coord1
-    lat2, lon2 = coord2
 
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
+def dist(X, Y):
+    dists = np.sqrt(-2 * np.dot(X, Y.T)
+                    + np.sum(Y ** 2, axis=1)
+                    + np.sum(X ** 2, axis=1)[:, np.newaxis])
+    return dists
 
-    a = math.sin(dphi/2)**2 + \
-        math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
 
-    return 2*R*math.atan2(math.sqrt(a), math.sqrt(1 - a))
+def latlng2xy(coords):
+    lat, lng = coords.T
+    R = 147000
+    x = R*np.cos(lat)*np.cos(lng)
+    y = R*np.cos(lat)*np.sin(lng)
+    return np.array([x, y]).T
 
 
 # JSON Serialize Numpy
@@ -44,7 +45,9 @@ def np_dumps(data):
 def tag_bikes_core(stations, buffers, bikes):
     """Return the tag as an 0-based index into the stations array"""
     buffers = np.array(buffers).reshape(-1, 1)
-    dists = cdist(stations, bikes, haversine)
+    xystations = latlng2xy(np.array(stations))
+    xybikes = latlng2xy(np.array(bikes))
+    dists = dist(xystations, xybikes)
     in_buffer = dists <= buffers
     masked = np.where(in_buffer, dists, np.Inf)
     outliers = ~np.any(in_buffer, axis=0)
