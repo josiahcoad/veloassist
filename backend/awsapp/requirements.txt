@@ -1,5 +1,4 @@
 slackclient==1.3.2
 numpy
-scipy
 requests
-geopy
+boto3

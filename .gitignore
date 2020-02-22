@@ -1,3 +1,6 @@
 **.pyc
 **.env
-backend/stations.json
+**/stations.json
+**/.chalice/deployments/
+**/.chalice/deployed/
+**/.chalice/venv/

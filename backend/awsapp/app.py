@@ -1,50 +1,59 @@
 from slackclient import SlackClient
-from flask import Flask, jsonify, request
 import numpy as np
 from os import environ
+from chalice import Chalice
 import json
-from . import db
-from . import veoride as vr
-from time import perf_counter
+from chalicelib import db
+from chalicelib import veoride as vr
 
-app = Flask(__name__)
 
-slack_token = environ.get('SLACK_API_KEY')
-assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
+app = Chalice(app_name='veloassist')
+app.debug = True
+
+# slack_token = environ.get('SLACK_API_KEY')
+# assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
+slack_token = "xoxb-940798258294-949827533862-tPo6OQ9jNUwzu0pSS6yHnVl7"
 sc = SlackClient(slack_token)
+
+
+# API Endpoints
+@app.route('/')
+def hello_world():
+    return {'hello': 'world'}
 
 
 @app.route('/station', methods=['GET', 'POST'])
 def station():
+    request = app.current_request
     if request.method == 'GET':
-        id = request.json
+        id = request.json_body
         station = db.read_database_single(id)
-        return jsonify({'data': station}), 200
+        return {'data': station}
     elif request.method == 'POST':
-        station = request.json
+        station = request.json_body
         db.update_database(station)
-        return jsonify({'success': True}), 200
+        return {'success': True}
 
 
 @app.route('/slack_message', methods=['POST'])
 def post_slack_message():
-    data = request.json
+    request = app.current_request
+    data = request.json_body
     try:
         response = sc.api_call(
             "chat.postMessage",
             channel="#bike-share",
             text=data['text'])
         if not response['ok']:
-            return jsonify({'success': False, 'error': response['error']}), 500
+            return {'success': False, 'error': response['error']}
     except Exception as e:
-        return jsonify({'success': False, 'error': e}), 500
-    return jsonify({'success': True}), 200
+        return {'success': False, 'error': e}
+    return {'success': True}
 
 
 # API Endpoint Highlevel
 @app.route('/bikes_stations', methods=['GET'])
 def get_bikes_and_stations():
-    start = perf_counter()
     # get bikes in College Station
     cs = (30.617592, -96.338644)
     bikes = vr.get_bikes_core(*cs)
@@ -58,6 +67,6 @@ def get_bikes_and_stations():
     stations = vr.get_station_fill(stations)
     # add data to objects
     bikes = [{**b, 'station': tag} for b, tag in zip(bikes, bike_tags)]
-    end = perf_counter()
-    print("Time is:", round(end-start, 2))
-    return jsonify({'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}), 200
+    response = {'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}
+    return response
+
