@@ -30,6 +30,7 @@ const makeStationCircle = station =>
     map,
     center: { lat: station.lat, lng: station.lng },
     radius: station.radius,
+    suppressUndo: true,
   });
 
 const showStationMarkers = stations =>
