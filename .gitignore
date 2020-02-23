@@ -4,4 +4,4 @@
 **/.chalice/deployments/
 **/.chalice/deployed/
 **/.chalice/venv/
-backend/awsapp/config.txt
+backend/awsapp/.chalice/config.json

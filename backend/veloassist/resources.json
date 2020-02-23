@@ -1,0 +1,32 @@
+{
+  "Outputs": {
+    "MediaTableName": {
+      "Value": {
+        "Ref": "StationsTable"
+      }
+    }
+  },
+  "Resources": {
+    "StationsTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "name",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "name",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      },
+      "Type": "AWS::DynamoDB::Table"
+    }
+  }
+}
