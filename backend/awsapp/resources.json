@@ -1,6 +1,6 @@
 {
   "Outputs": {
-    "MediaTableName": {
+    "StationsTableName": {
       "Value": {
         "Ref": "StationsTable"
       }
@@ -11,13 +11,13 @@
       "Properties": {
         "AttributeDefinitions": [
           {
-            "AttributeName": "name",
-            "AttributeType": "S"
+            "AttributeName": "id",
+            "AttributeType": "N"
           }
         ],
         "KeySchema": [
           {
-            "AttributeName": "name",
+            "AttributeName": "id",
             "KeyType": "HASH"
           }
         ],

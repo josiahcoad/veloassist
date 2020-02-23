@@ -1,41 +1,53 @@
 from slackclient import SlackClient
 import numpy as np
-from os import environ
+import os
 from chalice import Chalice
 import json
+import boto3
 from chalicelib import db
 from chalicelib import veoride as vr
-
+from decimal import Decimal
 
 app = Chalice(app_name='veloassist')
 app.debug = True
 
-# slack_token = environ.get('SLACK_API_KEY')
-# assert slack_token is not None, 'Must supply a SLACK_API_KEY.'
-slack_token = "xoxb-940798258294-949827533862-tPo6OQ9jNUwzu0pSS6yHnVl7"
+_STATIONS_DB = None
+
+
+def get_media_db():
+    global _STATIONS_DB
+    if _STATIONS_DB is None:
+        #pylint: disable=no-member
+        _STATIONS_DB = db.DynamoStationsDB(
+            boto3.resource('dynamodb').Table(
+                os.environ['STATIONS_TABLE_NAME']))
+    return _STATIONS_DB
+
+
+slack_token = os.environ.get('SLACK_API_KEY')
 sc = SlackClient(slack_token)
 
 
 # API Endpoints
-@app.route('/')
+@app.route('/', cors=True)
 def hello_world():
     return {'hello': 'world'}
 
 
-@app.route('/station', methods=['GET', 'POST'])
+@app.route('/station', methods=['GET', 'POST'], cors=True)
 def station():
     request = app.current_request
     if request.method == 'GET':
         id = request.json_body
-        station = db.read_database_single(id)
+        station = get_media_db().get_station(id)
         return {'data': station}
     elif request.method == 'POST':
         station = request.json_body
-        db.update_database(station)
+        get_media_db().add_station(station)
         return {'success': True}
 
 
-@app.route('/slack_message', methods=['POST'])
+@app.route('/slack_message', methods=['POST'], cors=True)
 def post_slack_message():
     request = app.current_request
     data = request.json_body
@@ -52,13 +64,13 @@ def post_slack_message():
 
 
 # API Endpoint Highlevel
-@app.route('/bikes_stations', methods=['GET'])
-def get_bikes_and_stations():
+@app.route('/bikes_stations', methods=['GET'], cors=True)
+def get_bikes_and_stations_http():
     # get bikes in College Station
     cs = (30.617592, -96.338644)
     bikes = vr.get_bikes_core(*cs)
     # get stations
-    stations = db.read_database()
+    stations = get_media_db().list_stations()
     # tag bikes
     bike_tags = vr.tag_bikes(stations, bikes)
     # get/set station occupancies
@@ -69,4 +81,3 @@ def get_bikes_and_stations():
     bikes = [{**b, 'station': tag} for b, tag in zip(bikes, bike_tags)]
     response = {'data': vr.np_dumps({'bikes': bikes, 'stations': stations})}
     return response
-
