@@ -26,4 +26,5 @@ async function initMap() {
   });
   await writeMap();
   $(".loader").hide();
+  $(".cbcontainer").show();
 }

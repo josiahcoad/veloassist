@@ -28,6 +28,12 @@ const showStationMarkers = stations =>
       const lng = circle.getCenter().lng();
       updateStation({ ...station, lat, lng });
     });
+    google.maps.event.addListener(circle, 'click', () => {
+      const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
+      if (checked) {
+        circle.setMap(null);
+      }
+    });
     addMarkerInfo(
       circle,
       circle.center,
@@ -94,4 +100,5 @@ const writeMap = async () => {
     .reverse()
     .forEach(addListItem);
   addAccordianEffect();
+  addTotalBikeCounts(bikes);
 };

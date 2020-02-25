@@ -25,3 +25,14 @@ const addAccordianEffect = () => {
       .slideToggle();
   });
 };
+
+const addTotalBikeCounts = bikes => {
+  const instation =
+    'Bikes out of stations: ' + bikes.filter(b => !b.station).length;
+  const outstation =
+    'Bikes in stations: ' + bikes.filter(b => b.station).length;
+  $('#total-bike-counts').append(`
+    <p>${instation}</p>
+    <p>${outstation}</p>`
+  );
+};
