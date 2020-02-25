@@ -15,6 +15,12 @@ const makeStationCircle = station =>
     suppressUndo: true,
   });
 
+const deleteStation = (stationMarker, station) => {
+  stationMarker.setMap(null);
+  callDeleteStation(station.id);
+  addRefreshButton();
+};
+
 const showStationMarkers = stations =>
   // show circles around each station
   stations.forEach(station => {
@@ -31,13 +37,14 @@ const showStationMarkers = stations =>
     google.maps.event.addListener(circle, 'click', () => {
       const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
       if (checked) {
-        circle.setMap(null);
+        deleteStation(circle, station);
       }
     });
     addMarkerInfo(
       circle,
       circle.center,
-      `Station at ${station.fill}% capacity (${station.occupancy}/${station.capacity})`
+      `Station at ${Math.round(station.fill * 100)}% capacity 
+      (${station.occupancy}/${station.capacity})`
     );
   });
 

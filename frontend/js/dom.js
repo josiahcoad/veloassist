@@ -1,3 +1,13 @@
+const addRefreshButton = () => {
+  $('.sidenav').prepend(
+    `<div class="center-block">
+      <button class="button" id="refresh-button" onclick="location.reload()">
+        Click to Refresh!
+      </button>
+    </div>`
+  );
+};
+
 const addListItem = station => {
   const pctFull = Math.round(station.fill * 100);
   const newElement = `
@@ -33,6 +43,5 @@ const addTotalBikeCounts = bikes => {
     'Bikes in stations: ' + bikes.filter(b => b.station).length;
   $('#total-bike-counts').append(`
     <p>${instation}</p>
-    <p>${outstation}</p>`
-  );
+    <p>${outstation}</p>`);
 };

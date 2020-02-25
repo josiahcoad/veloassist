@@ -1,12 +1,18 @@
 const apiurl = 'https://e6evmmci31.execute-api.us-east-1.amazonaws.com/api';
 
+const callDeleteStation = (id) =>
+  $.ajax({
+    url: `${apiurl}/station/${id}`,
+    type: 'DELETE',
+  }).then(response => response.success);
+
 const post = (url, data) =>
   $.ajax({
     url,
     type: 'POST',
     data: JSON.stringify(data),
     contentType: 'application/json',
-  }).then(response => response.data);
+  }).then(response => response.success);
 
 const getNearbyBikes = (lat, lng) =>
   $.get(`${apiurl}/bikes?lat=${lat}&lng=${lng}`).then(
@@ -16,12 +22,6 @@ const getNearbyBikes = (lat, lng) =>
 const getStationsAndBikes = () =>
   $.get(`${apiurl}/bikes_stations`).then(response => response.data);
 
-const getStations = () =>
-  $.get(`${apiurl}/stations`).then(response => response.data);
-
 const updateStation = station => post(`${apiurl}/station`, station);
-
-const tagBikes = (stations, bikes) =>
-  post(`${apiurl}/bike_tags`, { stations, bikes });
 
 const messageSlack = text => post(`${apiurl}/slack_message`, { text });

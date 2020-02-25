@@ -134,10 +134,10 @@ hr.nospace {
 .loader {
   border: 16px solid #f3f3f3;
   border-radius: 50%;
-  border-top: 16px solid #4285F4;
-  border-right: 16px solid #0F9D58;
-  border-bottom: 16px solid #DB4437;
-  border-left: 16px solid #F4B400;
+  border-top: 16px solid #4285f4;
+  border-right: 16px solid #0f9d58;
+  border-bottom: 16px solid #db4437;
+  border-left: 16px solid #f4b400;
   width: 60px;
   height: 60px;
   -webkit-animation: spin 2s linear infinite;
@@ -161,7 +161,6 @@ hr.nospace {
     transform: rotate(360deg);
   }
 }
-
 
 /* CHECK BOX CSS */
 /* Customize the label (the cbcontainer) */
@@ -204,12 +203,12 @@ hr.nospace {
 
 /* When the checkbox is checked, add a blue background */
 .cbcontainer input:checked ~ .checkmark {
-  background-color: #2196F3;
+  background-color: #2196f3;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {
-  content: "";
+  content: '';
   position: absolute;
   display: none;
 }
@@ -230,4 +229,30 @@ hr.nospace {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+#refresh-button {
+  display: inline-block;
+  padding: 15px 25px;
+  font-size: 24px;
+  margin: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px #999;
+}
+
+#refresh-button:hover {
+  background-color: #3e8e41;
+}
+
+#refresh-button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
 }
