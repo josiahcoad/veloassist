@@ -28,23 +28,22 @@ const showStationMarkers = stations =>
       const lng = circle.getCenter().lng();
       updateStation({ ...station, lat, lng });
     });
-    const pctFull = Math.round((station.occupancy / station.capacity) * 100);
-    const exclaim = pctFull >= 100 ? '!!' : '';
-    addCircleInfo(
+    addMarkerInfo(
       circle,
-      `Station at ${pctFull}% capacity${exclaim} (${station.occupancy}/${station.capacity})`
+      circle.center,
+      `Station at ${station.fill}% capacity (${station.occupancy}/${station.capacity})`
     );
   });
 
-const addCircleInfo = (circle, content) => {
+const addMarkerInfo = (marker, position, content) => {
   var infoWindow = new google.maps.InfoWindow({
     content,
-    position: circle['center'],
+    position,
   });
-  google.maps.event.addListener(circle, 'mouseover', function(ev) {
+  google.maps.event.addListener(marker, 'mouseover', function(ev) {
     infoWindow.open(map);
   });
-  google.maps.event.addListener(circle, 'mouseout', function(ev) {
+  google.maps.event.addListener(marker, 'mouseout', function(ev) {
     infoWindow.close();
   });
 };
@@ -53,13 +52,18 @@ const makeBikeMarker = bike => {
   const lat = bike.location.lat;
   const lng = bike.location.lng;
   const color = bike.station ? '6cf5a7' : 'ffffff';
-  return new google.maps.Marker({
+  const marker = new google.maps.Marker({
     position: { lat, lng },
     map,
     icon: {
       url: makeMarkerIcon(color),
     },
   });
+  const info = `
+  id: ${bike.id}<br/>
+  Type: ${bike.vehicleType == 0 ? 'pedal' : 'ebike'}<br/>
+  lock: ${bike.lockStatus == 1 ? 'locked' : 'unlocked'}`;
+  addMarkerInfo(marker, marker.position, info);
 };
 
 const lockClosed = bike => bike.lockStatus;
