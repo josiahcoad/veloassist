@@ -3,7 +3,7 @@ const makeMarkerIcon = color =>
 
 const makeStationCircle = station =>
   new google.maps.Circle({
-    editable: true,
+    editable: false,
     strokeColor: '#' + station.color,
     strokeOpacity: 0.8,
     strokeWeight: 2,
@@ -23,7 +23,7 @@ const deleteStation = (stationMarker, station) => {
 
 const showStationMarkers = stations =>
   // show circles around each station
-  stations.forEach(station => {
+  stations.map(station => {
     const circle = makeStationCircle(station);
     google.maps.event.addListener(circle, 'radius_changed', () => {
       const radius = circle.getRadius();
@@ -48,6 +48,7 @@ const showStationMarkers = stations =>
       `Station at ${Math.round(station.fill * 100)}% capacity 
       (${station.occupancy}/${station.capacity})`
     );
+    return circle;
   });
 
 const addMarkerInfo = (marker, position, content) => {
@@ -104,10 +105,11 @@ function centerMap(lat, lng) {
 const writeMap = async () => {
   const { bikes, stations } = await getStationsAndBikes();
   showBikeMarkers(bikes);
-  showStationMarkers(stations);
+  const stationMarkers = showStationMarkers(stations, false);
   sortByKey(stations, 'fill')
     .reverse()
     .forEach(addListItem);
   // addAccordianEffect();
   addTotalBikeCounts(bikes);
+  addEditOption(stationMarkers);
 };

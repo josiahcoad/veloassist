@@ -52,3 +52,13 @@ const addTotalBikeCounts = bikes => {
     <p>${instation}</p>
     <p>${outstation}</p>`);
 };
+
+const addEditOption = stationMarkers =>
+  $('#edit-mode input[type="checkbox"]').click(function() {
+    const checked = $(this).is(':checked');
+    if (checked) {
+      stationMarkers.map(m => m.setEditable(true));
+    } else {
+      stationMarkers.map(m => m.setEditable(false));
+    }
+  });
