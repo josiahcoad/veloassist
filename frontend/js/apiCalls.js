@@ -22,6 +22,6 @@ const getNearbyBikes = (lat, lng) =>
 const getStationsAndBikes = () =>
   $.get(`${apiurl}/bikes_stations`).then(response => response.data);
 
-const updateStation = station => post(`${apiurl}/station`, station);
+const updateStation = station => post(`${apiurl}/station/1`, station);
 
 const messageSlack = text => post(`${apiurl}/slack_message`, { text });
