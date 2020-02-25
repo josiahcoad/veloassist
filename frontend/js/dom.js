@@ -1,11 +1,18 @@
+var refreshButtonShowing = false;
+
 const addRefreshButton = () => {
-  $('.sidenav').prepend(
-    `<div class="center-block">
-      <button class="button" id="refresh-button" onclick="location.reload()">
-        Click to Refresh!
-      </button>
-    </div>`
-  );
+  if (!refreshButtonShowing) {
+    $('.sidenav').prepend(
+      `<div class="center-block center">
+        <p style="font-size: 12px">Changes you have made may not be reflected in
+        the side panel or bike coloring until you refresh</p>
+        <button class="button" id="refresh-button" onclick="location.reload()">
+          Refresh!
+        </button>
+      </div>`
+    );
+  }
+  refreshButtonShowing = true;
 };
 
 const addListItem = station => {

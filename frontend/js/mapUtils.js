@@ -28,11 +28,13 @@ const showStationMarkers = stations =>
     google.maps.event.addListener(circle, 'radius_changed', () => {
       const radius = circle.getRadius();
       updateStation({ ...station, radius });
+      addRefreshButton();
     });
     google.maps.event.addListener(circle, 'center_changed', () => {
       const lat = circle.getCenter().lat();
       const lng = circle.getCenter().lng();
       updateStation({ ...station, lat, lng });
+      addRefreshButton();
     });
     google.maps.event.addListener(circle, 'click', () => {
       const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
