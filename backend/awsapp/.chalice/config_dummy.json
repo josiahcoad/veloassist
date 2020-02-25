@@ -16,8 +16,5 @@
         "SLACK_API_KEY": ""
       }
     }
-  },
-  "environment_variables": {
-    "SLACK_API_KEY": ""
   }
 }
