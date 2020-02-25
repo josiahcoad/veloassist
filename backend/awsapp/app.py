@@ -34,16 +34,21 @@ def hello_world():
     return {'hello': 'world'}
 
 
-@app.route('/station', methods=['GET', 'POST'], cors=True)
-def station():
+@app.route('/station/{id}', methods=['GET', 'POST', 'DELETE'], cors=True)
+def station(id):
     request = app.current_request
     if request.method == 'GET':
-        id = request.json_body
-        station = get_media_db().get_station(id)
-        return {'data': station}
+        try:
+            station = get_media_db().get_station(id)
+            return {'data': station}
+        except Exception as e:
+            return {'error': str(e)}
     elif request.method == 'POST':
         station = request.json_body
         get_media_db().add_station(station)
+        return {'success': True}
+    elif request.method == 'DELETE':
+        get_media_db().delete_station(id)
         return {'success': True}
 
 

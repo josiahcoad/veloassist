@@ -42,15 +42,17 @@ class DynamoStationsDB(StationsDB):
     def get_station(self, id):
         response = self._table.get_item(
             Key={
-                'id': id,
+                'id': int(id),
             },
         )
+        print(response)
         return json.loads(json.dumps(response.get('Item'), use_decimal=True))
 
     def delete_station(self, id):
+        print(id)
         self._table.delete_item(
             Key={
-                'id': id,
+                'id': int(id),
             }
         )
 
