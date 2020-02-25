@@ -106,6 +106,6 @@ const writeMap = async () => {
   sortByKey(stations, 'fill')
     .reverse()
     .forEach(addListItem);
-  addAccordianEffect();
+  // addAccordianEffect();
   addTotalBikeCounts(bikes);
 };
