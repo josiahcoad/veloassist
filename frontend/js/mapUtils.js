@@ -52,8 +52,10 @@ const makeBikeMarker = bike => {
   const lat = bike.location.lat;
   const lng = bike.location.lng;
   const color = bike.station ? '6cf5a7' : 'ffffff';
+  const label = bike.vehicleType == 0 ? '' : 'E';
   const marker = new google.maps.Marker({
     position: { lat, lng },
+    label,
     map,
     icon: {
       url: makeMarkerIcon(color),
