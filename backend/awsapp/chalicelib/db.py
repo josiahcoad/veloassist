@@ -34,8 +34,17 @@ class DynamoStationsDB(StationsDB):
         response = self._table.scan(**scan_params)
         return json.loads(json.dumps(response['Items'], use_decimal=True))
 
+    def _check_missing_keys(self, station):
+        required_keys = {'id', 'lat', 'lng', 'color', 'radius', 'capacity'}
+        missing_keys = required_keys - station.keys()
+        return missing_keys
+
     def add_station(self, station):
         # station must have id
+        missing_keys = self._check_missing_keys(station)
+        if missing_keys:
+            raise Exception('Invalid station. Missing keys: ' +
+                            ', '.join(missing_keys))
         station = json.loads(json.dumps(station), parse_float=Decimal)
         self._table.put_item(Item=station)
 
@@ -49,7 +58,6 @@ class DynamoStationsDB(StationsDB):
         return json.loads(json.dumps(response.get('Item'), use_decimal=True))
 
     def delete_station(self, id):
-        print(id)
         self._table.delete_item(
             Key={
                 'id': int(id),
