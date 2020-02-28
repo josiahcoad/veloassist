@@ -15,9 +15,9 @@ const makeStationCircle = station =>
     suppressUndo: true,
   });
 
-const deleteStation = (stationMarker, station) => {
+const removeStation = (stationMarker, station) => {
   stationMarker.setMap(null);
-  callDeleteStation(station.id);
+  deleteStation(station.id);
   addRefreshButton();
 };
 
@@ -37,7 +37,7 @@ const showStationMarker = station => {
   google.maps.event.addListener(circle, 'click', () => {
     const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
     if (checked) {
-      deleteStation(circle, station);
+      removeStation(circle, station);
     }
   });
   addMarkerInfo(
@@ -60,6 +60,7 @@ const createStationMarker = (id, lat, lng) => {
   updateStation(station);
   // showStationMarker (won't have edit capability and will show NaN% fill)
   showStationMarker(station);
+  addRefreshButton();
 };
 
 const addMarkerInfo = (marker, position, content) => {

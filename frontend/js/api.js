@@ -1,6 +1,6 @@
 const apiurl = 'https://e6evmmci31.execute-api.us-east-1.amazonaws.com/api';
 
-const callDeleteStation = (id) =>
+const deleteStation = (id) =>
   $.ajax({
     url: `${apiurl}/station/${id}`,
     type: 'DELETE',
