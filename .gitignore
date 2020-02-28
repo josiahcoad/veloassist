@@ -1,7 +1,8 @@
 **.pyc
 **.env
 **/stations.json
-**/.chalice/deployments/
-**/.chalice/deployed/
-**/.chalice/venv/
+backend/awsapp/.chalice/deployments/
+backend/awsapp/.chalice/deployed/
+backend/awsapp/.chalice/venv/
 backend/awsapp/.chalice/config.json
+**/.DS_Store

@@ -21,35 +21,46 @@ const deleteStation = (stationMarker, station) => {
   addRefreshButton();
 };
 
-const showStationMarkers = stations =>
-  // show circles around each station
-  stations.map(station => {
-    const circle = makeStationCircle(station);
-    google.maps.event.addListener(circle, 'radius_changed', () => {
-      const radius = circle.getRadius();
-      updateStation({ ...station, radius });
-      addRefreshButton();
-    });
-    google.maps.event.addListener(circle, 'center_changed', () => {
-      const lat = circle.getCenter().lat();
-      const lng = circle.getCenter().lng();
-      updateStation({ ...station, lat, lng });
-      addRefreshButton();
-    });
-    google.maps.event.addListener(circle, 'click', () => {
-      const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
-      if (checked) {
-        deleteStation(circle, station);
-      }
-    });
-    addMarkerInfo(
-      circle,
-      circle.center,
-      `Station at ${Math.round(station.fill * 100)}% capacity 
-      (${station.occupancy}/${station.capacity})`
-    );
-    return circle;
+const showStationMarker = station => {
+  const circle = makeStationCircle(station);
+  google.maps.event.addListener(circle, 'radius_changed', () => {
+    const radius = circle.getRadius();
+    updateStation({ ...station, radius });
+    addRefreshButton();
   });
+  google.maps.event.addListener(circle, 'center_changed', () => {
+    const lat = circle.getCenter().lat();
+    const lng = circle.getCenter().lng();
+    updateStation({ ...station, lat, lng });
+    addRefreshButton();
+  });
+  google.maps.event.addListener(circle, 'click', () => {
+    const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
+    if (checked) {
+      deleteStation(circle, station);
+    }
+  });
+  addMarkerInfo(
+    circle,
+    circle.center,
+    `Station at ${Math.round(station.fill * 100)}% capacity 
+    (${station.occupancy}/${station.capacity})`
+  );
+  return circle;
+};
+
+const showStationMarkers = stations => stations.map(showStationMarker);
+
+const randomColor = () => Math.floor(Math.random() * 16777215).toString(16);
+
+const createStationMarker = (id, lat, lng) => {
+  const color = randomColor();
+  const station = { id, lat, lng, color, radius: 10, capacity: 10 };
+  // update db
+  updateStation(station);
+  // showStationMarker (won't have edit capability and will show NaN% fill)
+  showStationMarker(station);
+};
 
 const addMarkerInfo = (marker, position, content) => {
   var infoWindow = new google.maps.InfoWindow({
@@ -102,6 +113,17 @@ function centerMap(lat, lng) {
   map.setZoom(18);
 }
 
+const addCreateOption = () =>
+  google.maps.event.addListener(map, 'click', function(event) {
+    newStationId += 1;
+    let lat = event.latLng.lat();
+    let lng = event.latLng.lng();
+    const checked = $('#create-mode input[type="checkbox"]').is(':checked');
+    if (checked) {
+      createStationMarker(newStationId, lat, lng);
+    }
+  });
+
 const writeMap = async () => {
   const { bikes, stations } = await getStationsAndBikes();
   showBikeMarkers(bikes);
@@ -112,4 +134,6 @@ const writeMap = async () => {
   // addAccordianEffect();
   addTotalBikeCounts(bikes);
   addEditOption(stationMarkers);
+  newStationId = Math.max(...stations.map(s => s.id));
+  addCreateOption();
 };

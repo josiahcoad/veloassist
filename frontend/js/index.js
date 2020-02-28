@@ -1,6 +1,7 @@
 // Initialize map
 var map;
 const collegeStation = { lat: 30.617592, lng: -96.338644 };
+var newStationId; // global to keep the next station id to use when creating a new station
 
 // Sort array of json objects by key
 const sortByKey = (array, key) =>
@@ -25,6 +26,6 @@ async function initMap() {
     },
   });
   await writeMap();
-  $(".loader").hide();
-  $(".cbcontainer").show();
+  $('.loader').hide();
+  $('.cbcontainer').show();
 }
