@@ -76,14 +76,35 @@ const addMarkerInfo = (marker, position, content) => {
   });
 };
 
+const getBikeMarkerColor = bike => {
+  const colors = {
+    dark: {
+      blue: '1683c7',
+      red: 'de2121',
+      yellow: 'ebe323',
+    },
+    light: {
+      blue: 'add6f0',
+      red: 'f09090',
+      yellow: 'fffb94',
+    }
+  };
+  const ebike = 2;
+  const palette = bike.station === null ? colors.light : colors.dark;
+  if (bike.vehicleType == ebike) {
+    return bike.power < 30 ? palette.red : palette.yellow;
+  }
+  return palette.blue;
+};
+
 const makeBikeMarker = bike => {
   const lat = bike.location.lat;
   const lng = bike.location.lng;
-  const color = bike.station ? '6cf5a7' : 'ffffff';
+  const color = getBikeMarkerColor(bike);
   const label = bike.vehicleType == 0 ? '' : 'E';
   const marker = new google.maps.Marker({
     position: { lat, lng },
-    label,
+    // label,
     map,
     icon: {
       url: makeMarkerIcon(color),
