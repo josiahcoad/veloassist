@@ -34,7 +34,7 @@ const showStationMarker = station => {
     updateStation({ ...station, lat, lng });
     addRefreshButton();
   });
-  google.maps.event.addListener(circle, 'click', () => {
+  google.maps.event.addListener(circle, 'dblclick', () => {
     const checked = $('#delete-mode input[type="checkbox"]').is(':checked');
     if (checked) {
       removeStation(circle, station);
@@ -68,11 +68,8 @@ const addMarkerInfo = (marker, position, content) => {
     content,
     position,
   });
-  google.maps.event.addListener(marker, 'mouseover', function(ev) {
+  google.maps.event.addListener(marker, 'click', function(ev) {
     infoWindow.open(map);
-  });
-  google.maps.event.addListener(marker, 'mouseout', function(ev) {
-    infoWindow.close();
   });
 };
 
