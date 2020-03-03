@@ -81,12 +81,12 @@ const getBikeMarkerColor = bike => {
     dark: {
       blue: '1683c7',
       red: 'de2121',
-      yellow: 'ebe323',
+      yellow: 'fbff0f',
     },
     light: {
-      blue: 'add6f0',
+      blue: 'e0f3ff',
       red: 'f09090',
-      yellow: 'fffb94',
+      yellow: 'feffad',
     }
   };
   const ebike = 2;
