@@ -108,9 +108,9 @@ const makeBikeMarker = bike => {
     },
   });
   const info = `
-  id: ${bike.id}<br/>
+  Bike: ${bike.vehicleNumber}<br/>
   Type: ${bike.vehicleType == 0 ? 'pedal' : 'ebike'}<br/>
-  lock: ${bike.lockStatus == 1 ? 'locked' : 'unlocked'}`;
+  Lock: ${bike.lockStatus == 1 ? 'locked' : 'unlocked'}`;
   addMarkerInfo(marker, marker.position, info);
 };
 
