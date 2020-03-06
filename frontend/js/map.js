@@ -145,14 +145,15 @@ const addCreateOption = () =>
 
 const writeMap = async () => {
   const { bikes, stations } = await getStationsAndBikes();
+  let stations2 = stations.map(s => ({...s, min: 10}));
   showBikeMarkers(bikes);
-  const stationMarkers = showStationMarkers(stations, false);
-  sortByKey(stations, 'fill')
+  const stationMarkers = showStationMarkers(stations2, false);
+  sortByKey(stations2, 'fill')
     .reverse()
     .forEach(addListItem);
   // addAccordianEffect();
   addTotalBikeCounts(bikes);
   addEditOption(stationMarkers);
-  newStationId = Math.max(...stations.map(s => s.id));
+  newStationId = Math.max(...stations2.map(s => s.id));
   addCreateOption();
 };

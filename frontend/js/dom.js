@@ -20,7 +20,7 @@ const addListItem = station => {
   const newElement = `
     <div class="accordion-wrap">
       <button class="accordion" onclick="centerMap(${station.lat}, ${station.lng})">
-        <span class="right">${pctFull}% (${station.occupancy}/${station.capacity})</span>
+        <span class="right">Min: ${station.min}, Max: ${station.capacity}, Current: ${station.occupancy}</span>
         <span class="left">Station ${station.id}</span>
       </button>
       <div class="panel">
