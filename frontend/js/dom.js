@@ -32,6 +32,12 @@ const makeStationEditForm = station => `
           station.capacity
         }"/>
         <br />
+        <label for="lname">Min:</label>
+        <br />
+        <input type="text" id="station-min-input" value="${
+          station.min || 0
+        }"/>
+        <br />
         <br />
         <input type="submit" value="Submit" />
       </form>
@@ -106,10 +112,12 @@ const addStationEditPopup = stations => {
 // callback for HTML form input
 function onStationEditFormSubmit(id) {
   const station = stations.filter(s => s.id == id)[0];
-  let name = $(`.station-${id} #station-name-input`).val() || station.name;
+  const name = $(`.station-${id} #station-name-input`).val() || station.name;
   let capacity = $(`.station-${id} #station-capacity-input`).val();
   capacity = capacity ? parseInt(capacity) : station.capacity;
-  updateStation({ ...station, name, capacity });
+  let min = $(`.station-${id} #station-min-input`).val();
+  min = min ? parseInt(min) : 0;
+  updateStation({ ...station, name, min, capacity });
   $('.hover_bkgr_fricc').hide();
   return false;
 }
