@@ -15,13 +15,39 @@ const addRefreshButton = () => {
   refreshButtonShowing = true;
 };
 
+const makeStationEditForm = station => `
+  <div class="hover_bkgr_fricc station-${station.id}">
+    <span class="helper"></span>
+    <div>
+      <div class="popupCloseButton">&times;</div>
+      <form onsubmit="return onStationEditFormSubmit(${station.id})">
+        <label for="fname">Name:</label>
+        <br />
+        <input type="text" id="station-name-input" value="${station.name ||
+          station.id}"/>
+        <br />
+        <label for="lname">Capacity:</label>
+        <br />
+        <input type="text" id="station-capacity-input" value="${
+          station.capacity
+        }"/>
+        <br />
+        <br />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  </div>`;
+
 const addListItem = station => {
   const pctFull = Math.round(station.fill * 100);
   const newElement = `
-    <div class="accordion-wrap">
+    <div class="accordion-wrap station-${station.id}">
       <button class="accordion" onclick="centerMap(${station.lat}, ${station.lng})">
         <span class="right">${pctFull}% (${station.occupancy}/${station.capacity})</span>
-        <span class="left">Station ${station.id}</span>
+        <span class="left">
+          ${station.name || 'Station ' + station.id}
+          <i class="fa fa-gear trigger_popup_fricc station-${station.id}"></i>
+        </span>
       </button>
       <div class="panel">
         <p class="center">Id: ${station.id} </p>
@@ -31,6 +57,7 @@ const addListItem = station => {
       <hr class="nospace" />
     </div>`;
   $('.station-list').append(newElement);
+  $('.station-list').append(makeStationEditForm(station));
 };
 
 const addAccordianEffect = () => {
@@ -62,3 +89,27 @@ const addEditOption = stationMarkers =>
       stationMarkers.map(m => m.setEditable(false));
     }
   });
+
+const addStationEditPopup = stations => {
+  $('.trigger_popup_fricc').click(function() {
+    const stationid = $(this)
+      .attr('class')
+      .split(' ')
+      .filter(c => c.startsWith('station'))[0];
+    $('.hover_bkgr_fricc.' + stationid).show();
+  });
+  $('.popupCloseButton').click(function() {
+    $('.hover_bkgr_fricc').hide();
+  });
+};
+
+// callback for HTML form input
+function onStationEditFormSubmit(id) {
+  const station = stations.filter(s => s.id == id)[0];
+  let name = $(`.station-${id} #station-name-input`).val() || station.name;
+  let capacity = $(`.station-${id} #station-capacity-input`).val();
+  capacity = capacity ? parseInt(capacity) : station.capacity;
+  updateStation({ ...station, name, capacity });
+  $('.hover_bkgr_fricc').hide();
+  return false;
+}

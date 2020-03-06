@@ -1,3 +1,5 @@
+var stations;
+
 const makeMarkerIcon = color =>
   `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|${color}|000000`;
 
@@ -144,7 +146,9 @@ const addCreateOption = () =>
   });
 
 const writeMap = async () => {
-  const { bikes, stations } = await getStationsAndBikes();
+  const data = await getStationsAndBikes();
+  stations = data.stations;
+  const bikes = data.bikes;
   showBikeMarkers(bikes);
   const stationMarkers = showStationMarkers(stations, false);
   sortByKey(stations, 'fill')
@@ -155,4 +159,5 @@ const writeMap = async () => {
   addEditOption(stationMarkers);
   newStationId = Math.max(...stations.map(s => s.id));
   addCreateOption();
+  addStationEditPopup();
 };
