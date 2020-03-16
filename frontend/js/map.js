@@ -45,7 +45,8 @@ const showStationMarker = station => {
   addMarkerInfo(
     circle,
     circle.center,
-    `Station at ${Math.round(station.fill * 100)}% capacity 
+    `Station ${station.name || station.id}<br/>
+    at ${Math.round(station.fill * 100)}% capacity 
     (${station.occupancy}/${station.capacity})`
   );
   return circle;
@@ -73,6 +74,9 @@ const addMarkerInfo = (marker, position, content) => {
   google.maps.event.addListener(marker, 'click', function(ev) {
     infoWindow.open(map);
   });
+  google.maps.event.addListener(map, 'click', function(ev) {
+    infoWindow.close();
+  });
 };
 
 const getBikeMarkerColor = bike => {
@@ -86,7 +90,7 @@ const getBikeMarkerColor = bike => {
       blue: 'e0f3ff',
       red: 'f09090',
       yellow: 'feffad',
-    }
+    },
   };
   const ebike = 2;
   const palette = bike.station === null ? colors.light : colors.dark;
