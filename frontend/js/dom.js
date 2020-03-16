@@ -34,9 +34,7 @@ const makeStationEditForm = station => `
         <br />
         <label for="lname">Min:</label>
         <br />
-        <input type="text" id="station-min-input" value="${
-          station.min || 0
-        }"/>
+        <input type="text" id="station-min-input" value="${station.min || 0}"/>
         <br />
         <br />
         <input type="submit" value="Submit" />
@@ -48,8 +46,12 @@ const addListItem = station => {
   const pctFull = Math.round(station.fill * 100);
   const newElement = `
     <div class="accordion-wrap station-${station.id}">
-      <button class="accordion" onclick="centerMap(${station.lat}, ${station.lng})">
-        <span class="right">${pctFull}% (${station.occupancy}/${station.capacity})</span>
+      <button class="accordion" onclick="centerMap(${station.lat}, ${
+    station.lng
+  })">
+        <span class="right">${pctFull}% (${station.occupancy}/${
+    station.capacity
+  })</span>
         <span class="left">
           ${station.name || 'Station ' + station.id}
           <i class="fa fa-gear trigger_popup_fricc station-${station.id}"></i>
@@ -62,8 +64,8 @@ const addListItem = station => {
       </div>
       <hr class="nospace" />
     </div>`;
-  $('.station-list').append(newElement);
-  $('.station-list').append(makeStationEditForm(station));
+  $('#station-list').append(newElement);
+  $('#station-list').append(makeStationEditForm(station));
 };
 
 const addAccordianEffect = () => {
@@ -120,4 +122,13 @@ function onStationEditFormSubmit(id) {
   updateStation({ ...station, name, min, capacity });
   $('.hover_bkgr_fricc').hide();
   return false;
+}
+
+function onStationSortSelect() {
+  const options = ['fill', 'name', 'occupancy'];
+  const idx = document.getElementById('station-sort').selectedIndex;
+  $('#station-list').empty();
+  sortByKey(stations, options[idx])
+    .reverse()
+    .forEach(addListItem);
 }

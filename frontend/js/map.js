@@ -45,7 +45,7 @@ const showStationMarker = station => {
   addMarkerInfo(
     circle,
     circle.center,
-    `Station ${station.name || station.id}<br/>
+    `${station.name || 'Station ' + station.id}<br/>
     at ${Math.round(station.fill * 100)}% capacity 
     (${station.occupancy}/${station.capacity})`
   );
@@ -149,6 +149,10 @@ const addCreateOption = () =>
     }
   });
 
+const addSortByOption = () => {
+  $('#station-sort-container').show();
+};
+
 const writeMap = async () => {
   const data = await getStationsAndBikes();
   stations = data.stations;
@@ -164,4 +168,5 @@ const writeMap = async () => {
   newStationId = Math.max(...stations.map(s => s.id));
   addCreateOption();
   addStationEditPopup();
+  addSortByOption();
 };
