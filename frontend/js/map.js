@@ -153,6 +153,22 @@ const addSortByOption = () => {
   $('#station-sort-container').show();
 };
 
+const addSendSlackButton = stations => {
+  $('#send-slack-button').show();
+  const formatMsg = station =>
+    `- *${station.name || 'Station ' + station.id}* ` +
+    `at ${Math.round(station.fill * 100)}% capacity ` +
+    `(${station.occupancy}/${station.capacity})`;
+  $('#send-slack-button').click(() =>
+    messageSlack(
+      stations
+        .filter(station => station.fill > 1)
+        .map(formatMsg)
+        .join('\n')
+    )
+  );
+};
+
 const writeMap = async () => {
   const data = await getStationsAndBikes();
   stations = data.stations;
@@ -169,4 +185,5 @@ const writeMap = async () => {
   addCreateOption();
   addStationEditPopup();
   addSortByOption();
+  addSendSlackButton(stations);
 };

@@ -59,7 +59,7 @@ def post_slack_message():
     try:
         response = sc.api_call(
             "chat.postMessage",
-            channel="#bike-share",
+            channel="#velo_assist",
             text=data['text'])
         if not response['ok']:
             return {'success': False, 'error': response['error']}
